@@ -1,0 +1,56 @@
+{
+  "id": "io.github.tonyboysuper.RenovaPlan",
+  "runtime": "org.freedesktop.Platform",
+  "runtime-version": "25.08",
+  "sdk": "org.freedesktop.Sdk",
+  "sdk-extensions": [
+    "org.freedesktop.Sdk.Extension.rust-stable"
+  ],
+  "command": "renova-plan",
+  "finish-args": [
+    "--socket=wayland",
+    "--socket=fallback-x11",
+    "--share=ipc",
+    "--device=dri"
+  ],
+  "build-options": {
+    "append-path": "/usr/lib/sdk/rust-stable/bin",
+    "env": {
+      "CARGO_HOME": "/run/build/renova-plan/cargo",
+      "CARGO_NET_OFFLINE": "true"
+    }
+  },
+  "modules": [
+    {
+      "name": "renova-plan",
+      "buildsystem": "simple",
+      "build-commands": [
+        "cargo --offline build --locked --release",
+        "install -Dm0755 target/release/renova-plan /app/bin/renova-plan",
+        "install -Dm0644 flatpak/io.github.tonyboysuper.RenovaPlan.desktop /app/share/applications/io.github.tonyboysuper.RenovaPlan.desktop",
+        "install -Dm0644 flatpak/io.github.tonyboysuper.RenovaPlan.metainfo.xml /app/share/metainfo/io.github.tonyboysuper.RenovaPlan.metainfo.xml",
+        "install -Dm0644 icons/icon.svg /app/share/icons/hicolor/scalable/apps/io.github.tonyboysuper.RenovaPlan.svg",
+        "install -Dm0644 icons/32x32.png /app/share/icons/hicolor/32x32/apps/io.github.tonyboysuper.RenovaPlan.png",
+        "install -Dm0644 icons/64x64.png /app/share/icons/hicolor/64x64/apps/io.github.tonyboysuper.RenovaPlan.png",
+        "install -Dm0644 icons/128x128.png /app/share/icons/hicolor/128x128/apps/io.github.tonyboysuper.RenovaPlan.png",
+        "install -Dm0644 icons/128x128@2x.png /app/share/icons/hicolor/256x256/apps/io.github.tonyboysuper.RenovaPlan.png",
+        "install -Dm0644 icons/icon.png /app/share/icons/hicolor/512x512/apps/io.github.tonyboysuper.RenovaPlan.png",
+        "install -Dm0644 LICENSE /app/share/licenses/renova-plan/LICENSE",
+        "install -Dm0644 ui/fonts/OFL.txt /app/share/licenses/renova-plan/OFL-Inter.txt"
+      ],
+      "sources": [
+        {
+          "type": "dir",
+          "path": "..",
+          "skip": [
+            ".git",
+            "target",
+            "renova-plan.flatpak",
+            ".flatpak-builder"
+          ]
+        },
+        "cargo-sources.json"
+      ]
+    }
+  ]
+}

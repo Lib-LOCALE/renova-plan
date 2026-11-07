@@ -1,0 +1,25 @@
+# Rust build artifacts
+target/
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# Flatpak builder download and compilation cache
+.flatpak-builder/
+renova-plan.flatpak
+*.flatpak
+
+# Machine-local agent instructions and credentials
+AGENTS.md
+CLAUDE.md
+.env
+.env.*
+!.env.example
+
+# OS and editor clutter
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/

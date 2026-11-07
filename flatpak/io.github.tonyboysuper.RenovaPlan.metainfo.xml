@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.tonyboysuper.RenovaPlan</id>
+  <name>RenovaPlan</name>
+  <name xml:lang="fr">RenovaPlan</name>
+  <summary>2D/3D home renovation floor plan and cost estimation studio</summary>
+  <summary xml:lang="fr">Logiciel d'architecture 2D/3D et de chiffrage pour la rénovation de maison</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <developer id="io.github.tonyboysuper">
+    <name>TonyBoySUPER</name>
+  </developer>
+  <description>
+    <p>
+      RenovaPlan is a fast, native Linux application built with Rust and Slint for Wayland (Pop!_OS COSMIC) to design 2D architectural floor plans, inspect synchronized 3D models, manage renovation phases (Existing, Demolition, New Build), and automatically compute Loi Carrez areas and renovation cost estimates.
+    </p>
+    <p xml:lang="fr">
+      RenovaPlan est un logiciel natif Linux rapide écrit en Rust et Slint pour Wayland (Pop!_OS COSMIC) permettant de tracer des plans 2D cotés, visualiser la maquette 3D en temps réel, gérer les phases de chantier (Existant, Démolition, Création) et calculer automatiquement les surfaces Loi Carrez et le devis estimatif des travaux.
+    </p>
+  </description>
+  <launchable type="desktop-id">io.github.tonyboysuper.RenovaPlan.desktop</launchable>
+  <content_rating type="oars-1.1" />
+  <releases>
+    <release version="0.1.0" date="2026-11-07">
+      <description>
+        <p>Initial release with synchronized 2D/3D views, renovation states, bilingual FR/EN interface, and automatic Bill of Quantities.</p>
+      </description>
+    </release>
+  </releases>
+</component>

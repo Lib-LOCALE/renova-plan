@@ -1,0 +1,1474 @@
+import "fonts/InterVariable.ttf";
+import { ScrollView, AboutSlint, Palette as WidgetPalette } from "std-widgets.slint";
+
+export struct CatalogItem {
+    id: string,
+    label: string,
+    dims: string,
+    cost: string,
+}
+
+export struct EstimateRow {
+    category: string,
+    label: string,
+    status-tag: string,
+    status-kind: int, // 0=Existing, 1=Demolish, 2=New
+    quantity: string,
+    total: string,
+}
+
+export global Theme {
+    in-out property <color> bg: #faf8f5;
+    in-out property <color> panel: #f1ede4;
+    in-out property <color> surface: #ffffff;
+    in-out property <color> hover: #e4dfd3;
+    in-out property <color> border: #cfc8b8;
+    in-out property <color> text: #18181b;
+    in-out property <color> muted: #52525b;
+    in-out property <color> accent: #0369a1;
+    in-out property <color> on-accent: #ffffff;
+    in-out property <color> amber: #d97706;
+    in-out property <color> red: #dc2626;
+    in-out property <color> green: #059669;
+    in-out property <length> base-font: 14px;
+    in-out property <length> small-font: 12px;
+    in-out property <length> title-font: 16px;
+}
+
+component ActionButton inherits Rectangle {
+    in property <string> text;
+    in property <bool> active: false;
+    in property <bool> danger: false;
+    in property <bool> emerald: false;
+    in property <bool> amber-highlight: false;
+    in property <bool> enabled: true;
+    callback clicked();
+
+    min-height: 38px;
+    horizontal-stretch: 0;
+    border-radius: 8px;
+    border-width: active ? 2px : 1px;
+    border-color: danger ? Theme.red : emerald ? Theme.green : amber-highlight ? Theme.amber : active ? Theme.accent : Theme.border;
+    background: !enabled ? Theme.surface.darker(0.2) : touch.pressed ? Theme.hover.darker(0.12) : active ? (danger ? Theme.red : emerald ? Theme.green : amber-highlight ? Theme.amber : Theme.accent) : touch.has-hover ? Theme.hover : Theme.surface;
+    opacity: enabled ? 1.0 : 0.45;
+    animate background { duration: 140ms; }
+
+    accessible-role: button;
+    accessible-label: text;
+    accessible-action-default => { if root.enabled { root.clicked(); } }
+
+    HorizontalLayout {
+        padding-left: 9px;
+        padding-right: 9px;
+        Text {
+            text: root.text;
+            color: root.active ? (root.danger || root.emerald || root.amber-highlight ? #ffffff : Theme.on-accent) : root.danger ? Theme.red : root.emerald ? Theme.green : Theme.text;
+            font-size: Theme.base-font;
+            font-weight: root.active ? 700 : 600;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+    }
+
+    touch := TouchArea {
+        enabled: root.enabled;
+        clicked => { root.clicked(); }
+    }
+}
+
+component DockTab inherits Rectangle {
+    in property <string> icon-text;
+    in property <string> label;
+    in property <bool> active: false;
+    callback clicked();
+
+    min-height: 62px;
+    border-radius: 10px;
+    border-width: active ? 2px : 1px;
+    border-color: active ? Theme.accent : Theme.border;
+    background: active ? Theme.accent : touch.has-hover ? Theme.hover : Theme.surface;
+    animate background { duration: 140ms; }
+
+    accessible-role: button;
+    accessible-label: label;
+    accessible-action-default => { root.clicked(); }
+
+    VerticalLayout {
+        padding: 6px;
+        spacing: 3px;
+        alignment: center;
+        Text {
+            text: root.icon-text;
+            color: root.active ? Theme.on-accent : Theme.accent;
+            font-size: Theme.title-font;
+            font-weight: 800;
+            horizontal-alignment: center;
+        }
+        Text {
+            text: root.label;
+            color: root.active ? Theme.on-accent : Theme.text;
+            font-size: Theme.small-font;
+            font-weight: root.active ? 700 : 600;
+            horizontal-alignment: center;
+            wrap: word-wrap;
+        }
+    }
+
+    touch := TouchArea {
+        width: parent.width;
+        height: parent.height;
+        pointer-event(e) => {
+            debug("ToolItem pointer-event:", root.label, e);
+        }
+        clicked => {
+            debug("ToolItem clicked:", root.label);
+            root.clicked();
+        }
+    }
+}
+
+component ToolItem inherits Rectangle {
+    in property <string> icon-text: "•";
+    in property <string> label;
+    in property <string> shortcut: "";
+    in property <bool> active: false;
+    in property <bool> danger: false;
+    in property <bool> emerald: false;
+    callback clicked();
+
+    min-height: 44px;
+    border-radius: 8px;
+    background: active ? (danger ? Theme.red : emerald ? Theme.green : Theme.accent) : touch.has-hover ? Theme.hover : Theme.surface;
+    border-width: active ? 2px : 1px;
+    border-color: active ? (danger ? Theme.red : emerald ? Theme.green : Theme.accent) : danger ? Theme.red : emerald ? Theme.green : Theme.border;
+    animate background { duration: 140ms; }
+
+    accessible-role: button;
+    accessible-label: label;
+    accessible-action-default => { root.clicked(); }
+
+    HorizontalLayout {
+        padding-left: 10px;
+        padding-right: 10px;
+        spacing: 8px;
+        Rectangle {
+            width: 26px;
+            height: 26px;
+            y: (parent.height - self.height) / 2;
+            border-radius: 6px;
+            background: root.active ? #ffffff28 : Theme.panel;
+            Text {
+                text: root.icon-text;
+                color: root.active ? #ffffff : root.danger ? Theme.red : root.emerald ? Theme.green : Theme.accent;
+                font-size: Theme.base-font;
+                font-weight: 800;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+        }
+        Text {
+            text: root.label;
+            color: root.active ? (root.danger || root.emerald ? #ffffff : Theme.on-accent) : root.emerald ? Theme.green : Theme.text;
+            font-size: Theme.base-font;
+            font-weight: root.active ? 700 : 600;
+            vertical-alignment: center;
+            horizontal-stretch: 1;
+            wrap: word-wrap;
+        }
+    }
+
+    touch := TouchArea {
+        clicked => {
+            root.clicked();
+        }
+    }
+}
+
+component MetricRow inherits Rectangle {
+    in property <string> label;
+    in property <string> value;
+    in property <color> value-color: Theme.text;
+
+    height: 28px;
+    background: transparent;
+
+    HorizontalLayout {
+        padding-left: 4px;
+        padding-right: 4px;
+        Text {
+            text: root.label;
+            color: Theme.muted;
+            font-size: Theme.base-font;
+            font-weight: 500;
+            vertical-alignment: center;
+            horizontal-stretch: 1;
+        }
+        Text {
+            text: root.value;
+            color: root.value-color;
+            font-size: Theme.base-font;
+            font-weight: 700;
+            vertical-alignment: center;
+        }
+    }
+}
+
+export component RenovaWindow inherits Window {
+    title: root.tr("app_title");
+    icon: @image-url("../icons/icon.png");
+    preferred-width: 1420px;
+    preferred-height: 860px;
+    min-width: 960px;
+    min-height: 620px;
+    max-width: 100000px;
+    max-height: 100000px;
+    background: Theme.bg;
+    default-font-family: "Inter Variable";
+
+    init => {
+        WidgetPalette.color-scheme = root.theme-index == 1 ? ColorScheme.light : ColorScheme.dark;
+    }
+    changed theme-index => {
+        WidgetPalette.color-scheme = root.theme-index == 1 ? ColorScheme.light : ColorScheme.dark;
+    }
+    changed large-text => {
+        Theme.base-font = root.large-text ? 16px : 14px;
+        Theme.small-font = root.large-text ? 14px : 12px;
+        Theme.title-font = root.large-text ? 18px : 16px;
+    }
+
+    // State properties
+    in-out property <int> language-index: 0; // 0 = FR, 1 = EN
+    in-out property <int> theme-index: 1;    // 1 = Atelier Clair (default), 0 = COSMIC Dark, 2 = Mocha, 3 = Nord
+    in-out property <bool> large-text: false;
+    in-out property <bool> expert-mode: false;
+    in-out property <int> guided-step: 0;    // 0 = Pièces, 1 = Portes/Fenêtres, 2 = Meubles, 3 = Prix & Devis
+    in-out property <bool> show-welcome: false;
+    in-out property <int> view-mode: 0;      // 0 = Plan 2D plein écran par défaut, 1 = 2D+3D, 2 = Vue 3D
+    in-out property <int> phase-index: 0;    // 0 = Chantier, 1 = Before, 2 = After
+    in-out property <int> active-status: 2;  // 0 = Existing, 1 = Demolish, 2 = New
+    in-out property <string> active-tool: "select";
+    in-out property <int> catalog-cat: 0;    // 0=Living, 1=Kitchen, 2=Bedroom, 3=Bathroom, 4=Tech
+    in-out property <int> right-tab: 0;
+    in-out property <int> active-level: 0;
+    in-out property <bool> show-grid: true;
+    in-out property <bool> show-dims: true;
+    in-out property <bool> show-underlay: false;
+    in-out property <bool> show-about: false;
+    in-out property <string> toast-message: "";
+
+    // Viewport rendered images
+    in property <image> canvas-2d;
+    in property <image> canvas-3d;
+    in property <string> project-title: "Maison 110 m²";
+    in property <string> status-coords: "X: 0.00 m | Y: 0.00 m";
+    in property <string> status-hint: "";
+
+    // Catalog & Estimate Models
+    in property <[CatalogItem]> catalog-items;
+    in property <[EstimateRow]> estimate-rows;
+
+    // Selected item properties (shown in floating bottom bar on canvas!)
+    in property <bool> has-selection: false;
+    in property <string> sel-name: "";
+    in property <string> sel-kind: "";
+    in property <int> sel-status: 0;
+    in property <string> sel-length: "";
+    in property <string> sel-depth: "";
+    in property <string> sel-height: "";
+    in property <string> sel-rotation: "";
+    in property <string> sel-cost: "";
+
+    // Estimate Summary KPIs
+    in property <string> kpi-carrez: "0.0 m²";
+    in property <string> kpi-floor: "0.0 m²";
+    in property <string> kpi-demolish: "0.00 ml";
+    in property <string> kpi-new-walls: "0.00 ml";
+    in property <string> kpi-paint: "0.0 m²";
+    in property <string> kpi-total-cost: "0 €";
+
+    // Callbacks
+    pure callback translate(string, int) -> string;
+    pure function tr(key: string) -> string {
+        return root.translate(key, root.language-index);
+    }
+
+    callback action(string);
+    callback select-catalog-cat(int);
+    callback add-furniture-item(string);
+    callback pointer-2d(string, float, float, float, float, int);
+    callback pointer-3d(string, float, float, float, float, int);
+    callback wheel-2d(float, float, float, float, float);
+    callback wheel-3d(float);
+
+    VerticalLayout {
+        spacing: 0px;
+
+        // ==================== BARRE SUPÉRIEURE ÉPURÉE (STYLE PLANNER 5D / FLOORPLANNER) ====================
+        Rectangle {
+            height: 54px;
+            background: Theme.panel;
+            border-width: 1px;
+            border-color: Theme.border;
+
+            HorizontalLayout {
+                padding-left: 12px;
+                padding-right: 12px;
+                padding-top: 6px;
+                padding-bottom: 6px;
+                spacing: 8px;
+
+                Image {
+                    width: 34px;
+                    height: 34px;
+                    y: (parent.height - self.height) / 2;
+                    source: @image-url("../icons/icon.svg");
+                }
+
+                Text {
+                    text: "RenovaPlan";
+                    color: Theme.accent;
+                    font-size: Theme.title-font;
+                    font-weight: 800;
+                    vertical-alignment: center;
+                }
+
+                ActionButton {
+                    text: "⌂ " + root.tr("welcome_btn");
+                    clicked => { root.show-welcome = true; }
+                }
+
+                ActionButton {
+                    text: "↶ " + root.tr("undo");
+                    clicked => { root.action("undo"); }
+                }
+                ActionButton {
+                    text: "↷ " + root.tr("redo");
+                    clicked => { root.action("redo"); }
+                }
+
+                Rectangle { horizontal-stretch: 1; }
+
+                // Sélecteur de Vue (Plan 2D | 2D + 3D | Vue 3D)
+                ActionButton {
+                    text: root.tr("view_2d");
+                    active: root.view-mode == 0;
+                    clicked => { root.view-mode = 0; root.action("refresh"); }
+                }
+                ActionButton {
+                    text: root.tr("view_split");
+                    active: root.view-mode == 1;
+                    clicked => { root.view-mode = 1; root.action("refresh"); }
+                }
+                ActionButton {
+                    text: root.tr("view_3d");
+                    active: root.view-mode == 2;
+                    clicked => { root.view-mode = 2; root.action("refresh"); }
+                }
+
+                Rectangle { width: 1px; background: Theme.border; }
+
+                // Sélecteur Avant / Après / Chantier
+                ActionButton {
+                    text: root.tr("phase_before");
+                    active: root.phase-index == 1;
+                    clicked => { root.phase-index = 1; root.action("refresh"); }
+                }
+                ActionButton {
+                    text: root.tr("phase_after");
+                    active: root.phase-index == 2;
+                    emerald: root.phase-index == 2;
+                    clicked => { root.phase-index = 2; root.action("refresh"); }
+                }
+                ActionButton {
+                    text: root.tr("phase_chantier");
+                    active: root.phase-index == 0;
+                    amber-highlight: root.phase-index == 0;
+                    clicked => { root.phase-index = 0; root.action("refresh"); }
+                }
+
+                Rectangle { horizontal-stretch: 1; }
+
+                // Badge Budget en direct dans la barre supérieure (cliquer ouvre le détail des prix)
+                ActionButton {
+                    text: root.kpi-carrez + " • " + root.kpi-total-cost;
+                    amber-highlight: true;
+                    active: root.guided-step == 3;
+                    clicked => { root.guided-step = 3; }
+                }
+
+                ActionButton {
+                    text: root.large-text ? root.tr("font_large") : root.tr("font_normal");
+                    active: root.large-text;
+                    clicked => {
+                        root.large-text = !root.large-text;
+                        root.action("prefs:save");
+                    }
+                }
+                ActionButton {
+                    text: root.theme-index == 1 ? "Clair" : root.theme-index == 0 ? "Sombre" : root.theme-index == 2 ? "Mocha" : "Nord";
+                    clicked => {
+                        root.theme-index = Math.mod(root.theme-index + 1, 4);
+                        root.action("theme:cycle");
+                    }
+                }
+            }
+        }
+
+        // ==================== ZONE PRINCIPALE : 1 SEUL TIROIR À GAUCHE + GRAND PLAN ====================
+        HorizontalLayout {
+            vertical-stretch: 1;
+            spacing: 0px;
+
+            // 1. RAIL DE 4 GROS ONGLETS À GAUCHE (96px)
+            Rectangle {
+                width: 96px;
+                background: Theme.panel;
+                border-width: 1px;
+                border-color: Theme.border;
+
+                VerticalLayout {
+                    padding: 8px;
+                    spacing: 8px;
+
+                    DockTab {
+                        icon-text: "▢";
+                        label: root.tr("step_1");
+                        active: root.guided-step == 0;
+                        clicked => {
+                            root.guided-step = 0;
+                            root.active-tool = "select";
+                            root.action("tool:select");
+                        }
+                    }
+                    DockTab {
+                        icon-text: "⊞";
+                        label: root.tr("step_2");
+                        active: root.guided-step == 1;
+                        clicked => {
+                            root.guided-step = 1;
+                            root.active-tool = "select";
+                            root.action("tool:select");
+                        }
+                    }
+                    DockTab {
+                        icon-text: "✥";
+                        label: root.tr("step_3");
+                        active: root.guided-step == 2;
+                        clicked => {
+                            root.guided-step = 2;
+                            root.active-tool = "select";
+                            root.action("tool:select");
+                        }
+                    }
+                    DockTab {
+                        icon-text: "€";
+                        label: root.tr("step_4");
+                        active: root.guided-step == 3;
+                        clicked => {
+                            root.guided-step = 3;
+                            root.active-tool = "select";
+                            root.action("tool:select");
+                        }
+                    }
+
+                    Rectangle { vertical-stretch: 1; }
+
+                    ActionButton {
+                        text: "?";
+                        clicked => { root.show-about = !root.show-about; }
+                    }
+                }
+            }
+
+            // 2. TIROIR CATALOGUE SIMPLE (276px)
+            Rectangle {
+                width: 276px;
+                background: Theme.panel;
+                border-width: 1px;
+                border-color: Theme.border;
+
+                VerticalLayout {
+                    padding: 10px;
+                    spacing: 8px;
+
+                    // --- TIROIR 0 : PIÈCES PRÊTES À POSER EN 1 CLIC & DESSIN ---
+                    if root.guided-step == 0: VerticalLayout {
+                        spacing: 6px;
+                        vertical-stretch: 1;
+
+                        Text {
+                            text: root.tr("step1_title");
+                            color: Theme.accent;
+                            font-size: Theme.title-font;
+                            font-weight: 800;
+                            wrap: word-wrap;
+                        }
+                        Text {
+                            text: root.tr("step1_help");
+                            color: Theme.muted;
+                            font-size: Theme.small-font;
+                            wrap: word-wrap;
+                        }
+
+                        Rectangle { height: 1px; background: Theme.border; }
+
+                        Text {
+                            text: root.tr("quick_rooms_heading");
+                            color: Theme.muted;
+                            font-size: Theme.small-font;
+                            font-weight: 700;
+                        }
+                        ToolItem {
+                            icon-text: "+";
+                            label: root.tr("quick_living");
+                            emerald: true;
+                            clicked => { root.action("quick:living"); }
+                        }
+                        ToolItem {
+                            icon-text: "+";
+                            label: root.tr("quick_kitchen");
+                            emerald: true;
+                            clicked => { root.action("quick:kitchen"); }
+                        }
+                        ToolItem {
+                            icon-text: "+";
+                            label: root.tr("quick_bedroom");
+                            emerald: true;
+                            clicked => { root.action("quick:bedroom"); }
+                        }
+                        ToolItem {
+                            icon-text: "+";
+                            label: root.tr("quick_bathroom");
+                            emerald: true;
+                            clicked => { root.action("quick:bathroom"); }
+                        }
+                        HorizontalLayout {
+                            spacing: 6px;
+                            ActionButton {
+                                horizontal-stretch: 1;
+                                text: "+ Entrée 3×1,5";
+                                emerald: true;
+                                clicked => { root.action("quick:hallway"); }
+                            }
+                            ActionButton {
+                                horizontal-stretch: 1;
+                                text: "+ Bureau 3×2,5";
+                                emerald: true;
+                                clicked => { root.action("quick:office"); }
+                            }
+                        }
+                        HorizontalLayout {
+                            spacing: 6px;
+                            ActionButton {
+                                horizontal-stretch: 1;
+                                text: "+ WC 1,5×1,2";
+                                emerald: true;
+                                clicked => { root.action("quick:wc"); }
+                            }
+                            ActionButton {
+                                horizontal-stretch: 1;
+                                text: "+ Garage 5,5×3";
+                                emerald: true;
+                                clicked => { root.action("quick:garage"); }
+                            }
+                        }
+
+                        Rectangle { height: 1px; background: Theme.border; }
+
+                        Text {
+                            text: root.tr("draw_tools_heading");
+                            color: Theme.muted;
+                            font-size: Theme.small-font;
+                            font-weight: 700;
+                        }
+                        ToolItem {
+                            icon-text: "✥";
+                            label: root.tr("tool_select");
+                            active: root.active-tool == "select";
+                            clicked => { root.active-tool = "select"; root.action("tool:select"); }
+                        }
+                        ToolItem {
+                            icon-text: "▢";
+                            label: root.tr("tool_boxed_room");
+                            active: root.active-tool == "boxed_room";
+                            clicked => {
+                                root.active-status = 2;
+                                root.active-tool = "boxed_room";
+                                root.action("tool:boxed_room");
+                            }
+                        }
+                        ToolItem {
+                            icon-text: "┃";
+                            label: root.tr("tool_partition");
+                            active: root.active-tool == "partition";
+                            clicked => {
+                                root.active-status = 2;
+                                root.active-tool = "partition";
+                                root.action("tool:partition");
+                            }
+                        }
+                        ToolItem {
+                            icon-text: "✕";
+                            label: root.tr("tool_demolish_click");
+                            danger: true;
+                            active: root.active-tool == "demolish_click";
+                            clicked => {
+                                root.active-status = 1;
+                                root.active-tool = "demolish_click";
+                                root.action("tool:demolish_click");
+                            }
+                        }
+                        ToolItem {
+                            icon-text: "[M]";
+                            label: root.tr("tool_measure");
+                            active: root.active-tool == "measure";
+                            clicked => { root.active-tool = "measure"; root.action("tool:measure"); }
+                        }
+
+                        Rectangle { vertical-stretch: 1; }
+                    }
+
+                    // --- TIROIR 1 : PORTES & FENÊTRES (POSE EN 1 CLIC OU SUR MUR) ---
+                    if root.guided-step == 1: VerticalLayout {
+                        spacing: 6px;
+                        vertical-stretch: 1;
+
+                        Text {
+                            text: root.tr("step2_title");
+                            color: Theme.accent;
+                            font-size: Theme.title-font;
+                            font-weight: 800;
+                            wrap: word-wrap;
+                        }
+                        Text {
+                            text: root.tr("step2_help");
+                            color: Theme.muted;
+                            font-size: Theme.small-font;
+                            wrap: word-wrap;
+                        }
+
+                        Rectangle { height: 1px; background: Theme.border; }
+
+                        ToolItem {
+                            icon-text: "P1";
+                            label: root.tr("tool_door");
+                            active: root.active-tool == "door";
+                            clicked => { root.active-tool = "door"; root.action("quick:door"); }
+                        }
+                        ToolItem {
+                            icon-text: "P2";
+                            label: root.tr("tool_double_door");
+                            active: root.active-tool == "double_door";
+                            clicked => { root.active-tool = "double_door"; root.action("quick:double_door"); }
+                        }
+                        ToolItem {
+                            icon-text: "<>";
+                            label: root.tr("tool_sliding_door");
+                            active: root.active-tool == "sliding_door";
+                            clicked => { root.active-tool = "sliding_door"; root.action("quick:sliding_door"); }
+                        }
+                        ToolItem {
+                            icon-text: "∏";
+                            label: root.tr("tool_passage");
+                            active: root.active-tool == "passage";
+                            clicked => { root.active-tool = "passage"; root.action("quick:passage"); }
+                        }
+                        ToolItem {
+                            icon-text: "⊞";
+                            label: root.tr("tool_window");
+                            active: root.active-tool == "window";
+                            clicked => { root.active-tool = "window"; root.action("quick:window"); }
+                        }
+                        ToolItem {
+                            icon-text: "⊟";
+                            label: root.tr("tool_small_window");
+                            active: root.active-tool == "small_window";
+                            clicked => { root.active-tool = "small_window"; root.action("quick:small_window"); }
+                        }
+                        ToolItem {
+                            icon-text: "⊞⊞";
+                            label: root.tr("tool_bay_window");
+                            active: root.active-tool == "bay_window";
+                            clicked => { root.active-tool = "bay_window"; root.action("quick:bay_window"); }
+                        }
+
+                        Rectangle { vertical-stretch: 1; }
+                    }
+
+                    // --- TIROIR 2 : CATALOGUE DE MEUBLES ---
+                    if root.guided-step == 2: VerticalLayout {
+                        spacing: 6px;
+                        vertical-stretch: 1;
+
+                        Text {
+                            text: root.tr("step3_title");
+                            color: Theme.accent;
+                            font-size: Theme.title-font;
+                            font-weight: 800;
+                            wrap: word-wrap;
+                        }
+                        Text {
+                            text: root.tr("step3_help");
+                            color: Theme.muted;
+                            font-size: Theme.small-font;
+                            wrap: word-wrap;
+                        }
+
+                        HorizontalLayout {
+                            spacing: 4px;
+                            ActionButton {
+                                horizontal-stretch: 1;
+                                text: root.tr("cat_living");
+                                active: root.catalog-cat == 0;
+                                clicked => { root.catalog-cat = 0; root.select-catalog-cat(0); }
+                            }
+                            ActionButton {
+                                horizontal-stretch: 1;
+                                text: root.tr("cat_kitchen");
+                                active: root.catalog-cat == 1;
+                                clicked => { root.catalog-cat = 1; root.select-catalog-cat(1); }
+                            }
+                            ActionButton {
+                                horizontal-stretch: 1;
+                                text: root.tr("cat_bedroom");
+                                active: root.catalog-cat == 2;
+                                clicked => { root.catalog-cat = 2; root.select-catalog-cat(2); }
+                            }
+                        }
+                        HorizontalLayout {
+                            spacing: 4px;
+                            ActionButton {
+                                horizontal-stretch: 1;
+                                text: root.tr("cat_bathroom");
+                                active: root.catalog-cat == 3;
+                                clicked => { root.catalog-cat = 3; root.select-catalog-cat(3); }
+                            }
+                            ActionButton {
+                                horizontal-stretch: 1;
+                                text: root.tr("cat_technical");
+                                active: root.catalog-cat == 4;
+                                clicked => { root.catalog-cat = 4; root.select-catalog-cat(4); }
+                            }
+                        }
+
+                        ScrollView {
+                            vertical-stretch: 1;
+                            VerticalLayout {
+                                spacing: 6px;
+                                for item in root.catalog-items: Rectangle {
+                                    height: 54px;
+                                    border-radius: 8px;
+                                    background: item-touch.has-hover ? Theme.hover : Theme.surface;
+                                    border-width: 1px;
+                                    border-color: Theme.border;
+
+                                    HorizontalLayout {
+                                        padding-left: 10px;
+                                        padding-right: 10px;
+                                        spacing: 8px;
+                                        VerticalLayout {
+                                            alignment: center;
+                                            horizontal-stretch: 1;
+                                            Text {
+                                                text: item.label;
+                                                color: Theme.text;
+                                                font-size: Theme.base-font;
+                                                font-weight: 700;
+                                                overflow: elide;
+                                            }
+                                            Text {
+                                                text: item.dims + " • " + item.cost;
+                                                color: Theme.muted;
+                                                font-size: Theme.small-font;
+                                            }
+                                        }
+                                        Rectangle {
+                                            width: 64px;
+                                            height: 34px;
+                                            y: (parent.height - self.height) / 2;
+                                            border-radius: 6px;
+                                            background: Theme.accent;
+                                            Text {
+                                                text: "+ " + root.tr("add_item_btn");
+                                                color: Theme.on-accent;
+                                                font-size: Theme.small-font;
+                                                font-weight: 700;
+                                                horizontal-alignment: center;
+                                                vertical-alignment: center;
+                                            }
+                                        }
+                                    }
+
+                                    item-touch := TouchArea {
+                                        clicked => { root.add-furniture-item(item.id); }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // --- TIROIR 3 : PRIX, DEVIS & SAUVEGARDE ---
+                    if root.guided-step == 3: VerticalLayout {
+                        spacing: 6px;
+                        vertical-stretch: 1;
+
+                        Text {
+                            text: root.tr("step4_title");
+                            color: Theme.accent;
+                            font-size: Theme.title-font;
+                            font-weight: 800;
+                            wrap: word-wrap;
+                        }
+
+                        MetricRow { label: root.tr("est_carrez"); value: root.kpi-carrez; value-color: Theme.accent; }
+                        MetricRow { label: root.tr("est_demolish"); value: root.kpi-demolish; value-color: Theme.red; }
+                        MetricRow { label: root.tr("est_new_walls"); value: root.kpi-new-walls; value-color: Theme.green; }
+                        MetricRow { label: root.tr("est_paint"); value: root.kpi-paint; }
+
+                        Rectangle {
+                            height: 44px;
+                            border-radius: 8px;
+                            background: Theme.surface;
+                            border-width: 2px;
+                            border-color: Theme.amber;
+                            HorizontalLayout {
+                                padding-left: 10px;
+                                padding-right: 10px;
+                                Text {
+                                    text: root.tr("est_total");
+                                    color: Theme.text;
+                                    font-size: Theme.small-font;
+                                    font-weight: 700;
+                                    vertical-alignment: center;
+                                    horizontal-stretch: 1;
+                                }
+                                Text {
+                                    text: root.kpi-total-cost;
+                                    color: Theme.amber;
+                                    font-size: Theme.title-font;
+                                    font-weight: 800;
+                                    vertical-alignment: center;
+                                }
+                            }
+                        }
+
+                        ActionButton {
+                            text: "▸ " + root.tr("welcome_save");
+                            clicked => { root.action("project:save"); }
+                        }
+                        HorizontalLayout {
+                            spacing: 6px;
+                            ActionButton {
+                                horizontal-stretch: 1;
+                                text: "SVG";
+                                active: true;
+                                clicked => { root.action("export:svg"); }
+                            }
+                            ActionButton {
+                                horizontal-stretch: 1;
+                                text: "CSV";
+                                emerald: true;
+                                active: true;
+                                clicked => { root.action("export:csv"); }
+                            }
+                        }
+
+                        Text {
+                            text: root.tr("est_details");
+                            color: Theme.muted;
+                            font-size: Theme.small-font;
+                            font-weight: 700;
+                        }
+
+                        ScrollView {
+                            vertical-stretch: 1;
+                            VerticalLayout {
+                                spacing: 5px;
+                                for row in root.estimate-rows: Rectangle {
+                                    height: 52px;
+                                    border-radius: 8px;
+                                    background: Theme.surface;
+                                    border-width: 1px;
+                                    border-color: row.status-kind == 1 ? Theme.red : row.status-kind == 2 ? Theme.green : Theme.border;
+
+                                    VerticalLayout {
+                                        padding: 6px;
+                                        HorizontalLayout {
+                                            Text {
+                                                text: row.label;
+                                                color: Theme.text;
+                                                font-size: Theme.small-font;
+                                                font-weight: 700;
+                                                horizontal-stretch: 1;
+                                                overflow: elide;
+                                            }
+                                            Text {
+                                                text: row.total;
+                                                color: row.status-kind == 1 ? Theme.red : Theme.green;
+                                                font-size: Theme.small-font;
+                                                font-weight: 800;
+                                            }
+                                        }
+                                        HorizontalLayout {
+                                            Text {
+                                                text: row.status-tag;
+                                                color: Theme.muted;
+                                                font-size: Theme.small-font;
+                                                horizontal-stretch: 1;
+                                                overflow: elide;
+                                            }
+                                            Text {
+                                                text: row.quantity;
+                                                color: Theme.accent;
+                                                font-size: Theme.small-font;
+                                                font-weight: 600;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 3. GRAND ESPACE CENTRAL (80% DE L'ÉCRAN) + BARRE D'ACTIONS FLOTTANTE SUR L'OBJET CHOISI
+            VerticalLayout {
+                horizontal-stretch: 1;
+                spacing: 0px;
+
+                HorizontalLayout {
+                    vertical-stretch: 1;
+                    spacing: 2px;
+
+                    // 2D Floor Plan Viewport
+                    if root.view-mode == 0 || root.view-mode == 1: Rectangle {
+                        horizontal-stretch: 1;
+                        background: Theme.bg;
+                        clip: true;
+
+                        img2d := Image {
+                            width: parent.width;
+                            height: parent.height;
+                            source: root.canvas-2d;
+                            image-fit: fill;
+                        }
+
+                        ta2d := TouchArea {
+                            width: parent.width;
+                            height: parent.height;
+                            pointer-event(event) => {
+                                if event.kind == PointerEventKind.down {
+                                    root.pointer-2d(
+                                        "down",
+                                        self.mouse-x / 1px,
+                                        self.mouse-y / 1px,
+                                        self.width / 1px,
+                                        self.height / 1px,
+                                        event.button == PointerEventButton.right ? 2 : event.button == PointerEventButton.middle ? 3 : 1
+                                    );
+                                } else if event.kind == PointerEventKind.up {
+                                    root.pointer-2d(
+                                        "up",
+                                        self.mouse-x / 1px,
+                                        self.mouse-y / 1px,
+                                        self.width / 1px,
+                                        self.height / 1px,
+                                        event.button == PointerEventButton.right ? 2 : 1
+                                    );
+                                }
+                            }
+                            moved => {
+                                root.pointer-2d(
+                                    "move",
+                                    self.mouse-x / 1px,
+                                    self.mouse-y / 1px,
+                                    self.width / 1px,
+                                    self.height / 1px,
+                                    self.pressed ? 1 : 0
+                                );
+                            }
+                            scroll-event(event) => {
+                                root.wheel-2d(
+                                    self.mouse-x / 1px,
+                                    self.mouse-y / 1px,
+                                    self.width / 1px,
+                                    self.height / 1px,
+                                    event.delta-y / 1px
+                                );
+                                return accept;
+                            }
+                        }
+
+                        // Contrôles rapides 2D
+                        HorizontalLayout {
+                            x: 12px;
+                            y: 12px;
+                            height: 38px;
+                            spacing: 6px;
+                            alignment: start;
+                            ActionButton {
+                                text: root.tr("zoom_in");
+                                clicked => { root.action("2d:zoom_in"); }
+                            }
+                            ActionButton {
+                                text: root.tr("zoom_out");
+                                clicked => { root.action("2d:zoom_out"); }
+                            }
+                            ActionButton {
+                                text: root.tr("reset_view");
+                                clicked => { root.action("2d:reset"); }
+                            }
+                            ActionButton {
+                                text: root.active-level == 0 ? root.tr("level_short_0") : root.tr("level_short_1");
+                                amber-highlight: true;
+                                active: true;
+                                clicked => {
+                                    root.active-level = root.active-level == 0 ? 1 : 0;
+                                    root.action("level:toggle");
+                                }
+                            }
+                        }
+                    }
+
+                    // 3D Real-Time Viewport
+                    if root.view-mode == 1 || root.view-mode == 2: Rectangle {
+                        horizontal-stretch: 1;
+                        background: #10141d;
+                        clip: true;
+
+                        img3d := Image {
+                            width: parent.width;
+                            height: parent.height;
+                            source: root.canvas-3d;
+                            image-fit: fill;
+                        }
+
+                        ta3d := TouchArea {
+                            width: parent.width;
+                            height: parent.height;
+                            pointer-event(event) => {
+                                if event.kind == PointerEventKind.down {
+                                    root.pointer-3d(
+                                        "down",
+                                        self.mouse-x / 1px,
+                                        self.mouse-y / 1px,
+                                        self.width / 1px,
+                                        self.height / 1px,
+                                        event.button == PointerEventButton.right ? 2 : 1
+                                    );
+                                } else if event.kind == PointerEventKind.up {
+                                    root.pointer-3d(
+                                        "up",
+                                        self.mouse-x / 1px,
+                                        self.mouse-y / 1px,
+                                        self.width / 1px,
+                                        self.height / 1px,
+                                        1
+                                    );
+                                }
+                            }
+                            moved => {
+                                if self.pressed {
+                                    root.pointer-3d(
+                                        "move",
+                                        self.mouse-x / 1px,
+                                        self.mouse-y / 1px,
+                                        self.width / 1px,
+                                        self.height / 1px,
+                                        1
+                                    );
+                                }
+                            }
+                            scroll-event(event) => {
+                                root.wheel-3d(event.delta-y / 1px);
+                                return accept;
+                            }
+                        }
+
+                        // Contrôles rapides 3D
+                        HorizontalLayout {
+                            x: 12px;
+                            y: 12px;
+                            height: 38px;
+                            spacing: 6px;
+                            alignment: start;
+                            ActionButton {
+                                text: root.tr("cam_iso");
+                                clicked => { root.action("3d:iso"); }
+                            }
+                            ActionButton {
+                                text: root.tr("cam_top");
+                                clicked => { root.action("3d:top"); }
+                            }
+                            ActionButton {
+                                text: root.tr("cam_interior");
+                                clicked => { root.action("3d:interior"); }
+                            }
+                            ActionButton {
+                                text: root.tr("cut_short");
+                                clicked => { root.action("3d:cut_cycle"); }
+                            }
+                        }
+                    }
+                }
+
+                // BARRE CONTEXTUELLE DE L'ÉLÉMENT SÉLECTIONNÉ (STYLE PLANNER 5D / ROOMSKETCHER : N'APPARAÎT QU'AU CLIC)
+                if root.has-selection: Rectangle {
+                    height: 60px;
+                    background: Theme.surface;
+                    border-width: 2px;
+                    border-color: Theme.amber;
+
+                    HorizontalLayout {
+                        padding-left: 10px;
+                        padding-right: 10px;
+                        padding-top: 8px;
+                        padding-bottom: 8px;
+                        spacing: 5px;
+
+                        VerticalLayout {
+                            alignment: center;
+                            Text {
+                                text: root.sel-name;
+                                color: Theme.text;
+                                font-size: Theme.base-font;
+                                font-weight: 800;
+                            }
+                            Text {
+                                text: root.sel-kind + " • " + root.sel-length + " • " + root.sel-cost;
+                                color: Theme.accent;
+                                font-size: Theme.small-font;
+                                font-weight: 600;
+                            }
+                        }
+
+                        Rectangle { horizontal-stretch: 1; }
+
+                        // Statut Rénovation en 1 clic
+                        ActionButton {
+                            text: root.tr("status_existing");
+                            active: root.sel-status == 0;
+                            clicked => { root.action("sel:status:0"); }
+                        }
+                        ActionButton {
+                            text: root.tr("status_demolish");
+                            danger: true;
+                            active: root.sel-status == 1;
+                            clicked => { root.action("sel:status:1"); }
+                        }
+                        ActionButton {
+                            text: root.tr("status_new");
+                            emerald: true;
+                            active: root.sel-status == 2;
+                            clicked => { root.action("sel:status:2"); }
+                        }
+
+                        Rectangle { width: 1px; background: Theme.border; }
+
+                        // Dimensions & Actions rapides
+                        ActionButton {
+                            text: root.tr("btn_minus_len");
+                            clicked => { root.action("sel:len:-"); }
+                        }
+                        ActionButton {
+                            text: root.tr("btn_plus_len");
+                            clicked => { root.action("sel:len:+"); }
+                        }
+                        ActionButton {
+                            text: "↻ " + root.tr("btn_rotate");
+                            clicked => { root.action("sel:rotate"); }
+                        }
+                        ActionButton {
+                            text: "+ " + root.tr("btn_duplicate");
+                            clicked => { root.action("sel:duplicate"); }
+                        }
+                        ActionButton {
+                            text: "✕ " + root.tr("btn_delete");
+                            danger: true;
+                            clicked => { root.action("sel:delete"); }
+                        }
+                    }
+                }
+
+                // BARRE D'ÉTAT & ASTUCE EN BAS (34px)
+                Rectangle {
+                    height: 34px;
+                    background: Theme.panel;
+                    border-width: 1px;
+                    border-color: Theme.border;
+
+                    HorizontalLayout {
+                        padding-left: 14px;
+                        padding-right: 14px;
+                        spacing: 16px;
+
+                        Text {
+                            text: root.tr("legend_existing");
+                            color: Theme.muted;
+                            font-size: Theme.small-font;
+                            font-weight: 600;
+                            vertical-alignment: center;
+                        }
+                        Text {
+                            text: root.tr("legend_demolish");
+                            color: Theme.red;
+                            font-size: Theme.small-font;
+                            font-weight: 700;
+                            vertical-alignment: center;
+                        }
+                        Text {
+                            text: root.tr("legend_new");
+                            color: Theme.green;
+                            font-size: Theme.small-font;
+                            font-weight: 700;
+                            vertical-alignment: center;
+                        }
+
+                        Rectangle { horizontal-stretch: 1; }
+
+                        if root.toast-message != "": Text {
+                            text: root.toast-message;
+                            color: Theme.amber;
+                            font-size: Theme.base-font;
+                            font-weight: 800;
+                            vertical-alignment: center;
+                        }
+
+                        if root.toast-message == "": Text {
+                            text: root.status-hint;
+                            color: Theme.text;
+                            font-size: Theme.small-font;
+                            font-weight: 600;
+                            vertical-alignment: center;
+                            overflow: elide;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // ==================== ÉCRAN D'ACCUEIL (« CHANGER DE MAISON ») ====================
+    if root.show-welcome: Rectangle {
+        width: parent.width;
+        height: parent.height;
+        background: #000000aa;
+
+        TouchArea { clicked => { root.show-welcome = false; } }
+
+        Rectangle {
+            width: 820px;
+            height: 460px;
+            x: (parent.width - self.width) / 2;
+            y: (parent.height - self.height) / 2;
+            background: Theme.panel;
+            border-radius: 14px;
+            border-width: 2px;
+            border-color: Theme.accent;
+
+            TouchArea {}
+
+            VerticalLayout {
+                padding: 24px;
+                spacing: 16px;
+
+                Text {
+                    text: root.tr("welcome_title");
+                    color: Theme.accent;
+                    font-size: 24px;
+                    font-weight: 800;
+                    horizontal-alignment: center;
+                }
+                Text {
+                    text: root.tr("welcome_subtitle");
+                    color: Theme.text;
+                    font-size: Theme.base-font;
+                    horizontal-alignment: center;
+                }
+
+                HorizontalLayout {
+                    spacing: 14px;
+                    vertical-stretch: 1;
+
+                    Rectangle {
+                        horizontal-stretch: 1;
+                        background: Theme.surface;
+                        border-radius: 10px;
+                        border-width: 2px;
+                        border-color: Theme.accent;
+                        VerticalLayout {
+                            padding: 16px;
+                            spacing: 10px;
+                            Text {
+                                text: "⌂ " + root.tr("card_house_title");
+                                color: Theme.text;
+                                font-size: Theme.title-font;
+                                font-weight: 800;
+                                wrap: word-wrap;
+                            }
+                            Text {
+                                text: root.tr("card_house_desc");
+                                color: Theme.muted;
+                                font-size: Theme.base-font;
+                                wrap: word-wrap;
+                                vertical-stretch: 1;
+                            }
+                            ActionButton {
+                                text: root.tr("card_open_btn");
+                                active: true;
+                                clicked => {
+                                    root.show-welcome = false;
+                                    root.action("preset:house");
+                                }
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        horizontal-stretch: 1;
+                        background: Theme.surface;
+                        border-radius: 10px;
+                        border-width: 1px;
+                        border-color: Theme.border;
+                        VerticalLayout {
+                            padding: 16px;
+                            spacing: 10px;
+                            Text {
+                                text: "⊞ " + root.tr("card_studio_title");
+                                color: Theme.text;
+                                font-size: Theme.title-font;
+                                font-weight: 800;
+                                wrap: word-wrap;
+                            }
+                            Text {
+                                text: root.tr("card_studio_desc");
+                                color: Theme.muted;
+                                font-size: Theme.base-font;
+                                wrap: word-wrap;
+                                vertical-stretch: 1;
+                            }
+                            ActionButton {
+                                text: root.tr("card_open_btn");
+                                emerald: true;
+                                active: true;
+                                clicked => {
+                                    root.show-welcome = false;
+                                    root.action("preset:studio");
+                                }
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        horizontal-stretch: 1;
+                        background: Theme.surface;
+                        border-radius: 10px;
+                        border-width: 1px;
+                        border-color: Theme.border;
+                        VerticalLayout {
+                            padding: 16px;
+                            spacing: 10px;
+                            Text {
+                                text: "▢ " + root.tr("card_blank_title");
+                                color: Theme.text;
+                                font-size: Theme.title-font;
+                                font-weight: 800;
+                                wrap: word-wrap;
+                            }
+                            Text {
+                                text: root.tr("card_blank_desc");
+                                color: Theme.muted;
+                                font-size: Theme.base-font;
+                                wrap: word-wrap;
+                                vertical-stretch: 1;
+                            }
+                            ActionButton {
+                                text: root.tr("card_open_btn");
+                                clicked => {
+                                    root.show-welcome = false;
+                                    root.action("preset:blank");
+                                }
+                            }
+                        }
+                    }
+                }
+
+                HorizontalLayout {
+                    spacing: 10px;
+                    ActionButton {
+                        horizontal-stretch: 1;
+                        text: root.tr("welcome_save");
+                        clicked => {
+                            root.show-welcome = false;
+                            root.action("project:save");
+                        }
+                    }
+                    ActionButton {
+                        horizontal-stretch: 1;
+                        text: root.tr("welcome_load");
+                        emerald: true;
+                        clicked => {
+                            root.show-welcome = false;
+                            root.action("project:load");
+                        }
+                    }
+                    ActionButton {
+                        horizontal-stretch: 1;
+                        text: root.tr("welcome_continue");
+                        active: true;
+                        clicked => { root.show-welcome = false; }
+                    }
+                }
+            }
+        }
+    }
+
+    // ==================== MODALE D'AIDE & À PROPOS ====================
+    if root.show-about: Rectangle {
+        width: parent.width;
+        height: parent.height;
+        background: #000000aa;
+
+        TouchArea { clicked => { root.show-about = false; } }
+
+        Rectangle {
+            width: 480px;
+            height: 360px;
+            x: (parent.width - self.width) / 2;
+            y: (parent.height - self.height) / 2;
+            background: Theme.panel;
+            border-radius: 12px;
+            border-width: 2px;
+            border-color: Theme.accent;
+
+            TouchArea {}
+
+            VerticalLayout {
+                padding: 20px;
+                spacing: 10px;
+                Text {
+                    text: root.tr("app_title");
+                    color: Theme.accent;
+                    font-size: Theme.title-font;
+                    font-weight: 800;
+                    horizontal-alignment: center;
+                }
+                Text {
+                    text: root.tr("subtitle");
+                    color: Theme.text;
+                    font-size: Theme.base-font;
+                    horizontal-alignment: center;
+                    wrap: word-wrap;
+                }
+                AboutSlint {}
+                ActionButton {
+                    text: "Fermer / Close (Échap)";
+                    active: true;
+                    clicked => { root.show-about = false; }
+                }
+            }
+        }
+    }
+}

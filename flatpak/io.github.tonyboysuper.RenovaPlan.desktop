@@ -1,0 +1,16 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=RenovaPlan
+Name[fr]=RenovaPlan
+GenericName=Atelier de plans 2D/3D et rénovation de maison
+GenericName[fr]=Atelier de plans 2D/3D et rénovation de maison
+Comment=Créez vos pièces en 2D en 1 clic, visualisez en 3D et chiffrez vos travaux de rénovation
+Comment[fr]=Créez vos pièces en 2D en 1 clic, visualisez en 3D et chiffrez vos travaux de rénovation
+Exec=renova-plan
+Icon=io.github.tonyboysuper.RenovaPlan
+Terminal=false
+Categories=Graphics;3DGraphics;Engineering;Construction;
+Keywords=architecture;renovation;floorplan;3D;CAD;BIM;plan;maison;travaux;devis;
+StartupNotify=true
+StartupWMClass=io.github.tonyboysuper.RenovaPlan

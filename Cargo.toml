@@ -1,0 +1,35 @@
+[package]
+name = "renova-plan"
+version = "0.1.0"
+description = "Logiciel natif 2D/3D de plans et rénovation de maison (Slint/Rust/Wayland)"
+edition = "2024"
+rust-version = "1.92"
+license = "MIT"
+
+[workspace]
+members = ["moteur"]
+
+[dependencies]
+moteur = { path = "moteur" }
+slint = { version = "~1.18.1", default-features = false, features = [
+    "std",
+    "compat-1-18",
+    "backend-winit",
+    "renderer-femtovg",
+    "renderer-software",
+    "accessibility",
+    "unstable-winit-030",
+] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+arboard = { version = "3.6", default-features = false, features = ["wayland-data-control"] }
+
+[build-dependencies]
+slint-build = "~1.18.1"
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 3
+panic = "abort"
+strip = true
