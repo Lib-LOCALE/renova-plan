@@ -666,14 +666,7 @@ impl AppState {
                 );
             }
             "quick:kitchen" => {
-                self.quick_add_room(
-                    ui,
-                    "Cuisine",
-                    "Kitchen",
-                    3.5,
-                    3.0,
-                    FloorMaterial::LightTile,
-                );
+                self.quick_add_room(ui, "Cuisine", "Kitchen", 3.5, 3.0, FloorMaterial::LightTile);
             }
             "quick:bathroom" => {
                 self.quick_add_room(
@@ -696,14 +689,7 @@ impl AppState {
                 );
             }
             "quick:office" => {
-                self.quick_add_room(
-                    ui,
-                    "Bureau",
-                    "Office",
-                    3.0,
-                    2.5,
-                    FloorMaterial::OakParquet,
-                );
+                self.quick_add_room(ui, "Bureau", "Office", 3.0, 2.5, FloorMaterial::OakParquet);
             }
             "quick:wc" => {
                 self.quick_add_room(ui, "WC", "WC", 1.5, 1.25, FloorMaterial::LightTile);
@@ -1190,88 +1176,91 @@ impl AppState {
                     self.drag2d = Drag2DState::None;
                 }
                 match self.drag2d {
-                Drag2DState::Panning {
-                    start_sx,
-                    start_sy,
-                    orig_pan_x,
-                    orig_pan_y,
-                } => {
-                    self.cam2d.pan_x = orig_pan_x - (bx - start_sx) / self.cam2d.zoom;
-                    self.cam2d.pan_y = orig_pan_y - (by - start_sy) / self.cam2d.zoom;
-                }
-                Drag2DState::MovingEntity {
-                    entity,
-                    ref mut last_wx,
-                    ref mut last_wy,
-                } => {
-                    let dx = snap_wx - *last_wx;
-                    let dy = snap_wy - *last_wy;
-                    if dx.abs() > 1e-4 || dy.abs() > 1e-4 {
-                        move_entity(&mut self.project, entity, dx, dy, raw_wx, raw_wy);
-                        *last_wx = snap_wx;
-                        *last_wy = snap_wy;
+                    Drag2DState::Panning {
+                        start_sx,
+                        start_sy,
+                        orig_pan_x,
+                        orig_pan_y,
+                    } => {
+                        self.cam2d.pan_x = orig_pan_x - (bx - start_sx) / self.cam2d.zoom;
+                        self.cam2d.pan_y = orig_pan_y - (by - start_sy) / self.cam2d.zoom;
                     }
-                }
-                Drag2DState::ResizingWallEndpoint { wall_id, is_end2 } => {
-                    if let Some(w) = self.project.walls.iter_mut().find(|w| w.id == wall_id) {
-                        if is_end2 {
-                            if ((snap_wx - w.x1).powi(2) + (snap_wy - w.y1).powi(2)).sqrt() >= 0.30
-                            {
-                                w.x2 = snap_wx;
-                                w.y2 = snap_wy;
-                            }
-                        } else if ((snap_wx - w.x2).powi(2) + (snap_wy - w.y2).powi(2)).sqrt()
-                            >= 0.30
-                        {
-                            w.x1 = snap_wx;
-                            w.y1 = snap_wy;
+                    Drag2DState::MovingEntity {
+                        entity,
+                        ref mut last_wx,
+                        ref mut last_wy,
+                    } => {
+                        let dx = snap_wx - *last_wx;
+                        let dy = snap_wy - *last_wy;
+                        if dx.abs() > 1e-4 || dy.abs() > 1e-4 {
+                            move_entity(&mut self.project, entity, dx, dy, raw_wx, raw_wy);
+                            *last_wx = snap_wx;
+                            *last_wy = snap_wy;
                         }
                     }
-                }
-                Drag2DState::ResizingRoom {
-                    room_id,
-                    anchor_x,
-                    anchor_y,
-                } => {
-                    if let Some(r) = self.project.rooms.iter().find(|r| r.id == room_id).cloned() {
-                        let (nx, nw) = match anchor_x {
-                            Some(ax) => {
-                                let w = (snap_wx - ax).abs().max(1.0);
-                                let x = if snap_wx < ax { ax - w } else { ax };
-                                (x, w)
+                    Drag2DState::ResizingWallEndpoint { wall_id, is_end2 } => {
+                        if let Some(w) = self.project.walls.iter_mut().find(|w| w.id == wall_id) {
+                            if is_end2 {
+                                if ((snap_wx - w.x1).powi(2) + (snap_wy - w.y1).powi(2)).sqrt()
+                                    >= 0.30
+                                {
+                                    w.x2 = snap_wx;
+                                    w.y2 = snap_wy;
+                                }
+                            } else if ((snap_wx - w.x2).powi(2) + (snap_wy - w.y2).powi(2)).sqrt()
+                                >= 0.30
+                            {
+                                w.x1 = snap_wx;
+                                w.y1 = snap_wy;
                             }
-                            None => (r.x, r.width),
-                        };
-                        let (ny, nd) = match anchor_y {
-                            Some(ay) => {
-                                let d = (snap_wy - ay).abs().max(1.0);
-                                let y = if snap_wy < ay { ay - d } else { ay };
-                                (y, d)
-                            }
-                            None => (r.y, r.depth),
-                        };
-                        self.project.update_room_rect(room_id, nx, ny, nw, nd);
+                        }
                     }
-                }
-                Drag2DState::DrawingWall {
-                    ref mut cur_wx,
-                    ref mut cur_wy,
-                    ..
-                }
-                | Drag2DState::DrawingRoom {
-                    ref mut cur_wx,
-                    ref mut cur_wy,
-                    ..
-                }
-                | Drag2DState::Measuring {
-                    ref mut cur_wx,
-                    ref mut cur_wy,
-                    ..
-                } => {
-                    *cur_wx = snap_wx;
-                    *cur_wy = snap_wy;
-                }
-                Drag2DState::None => {}
+                    Drag2DState::ResizingRoom {
+                        room_id,
+                        anchor_x,
+                        anchor_y,
+                    } => {
+                        if let Some(r) =
+                            self.project.rooms.iter().find(|r| r.id == room_id).cloned()
+                        {
+                            let (nx, nw) = match anchor_x {
+                                Some(ax) => {
+                                    let w = (snap_wx - ax).abs().max(1.0);
+                                    let x = if snap_wx < ax { ax - w } else { ax };
+                                    (x, w)
+                                }
+                                None => (r.x, r.width),
+                            };
+                            let (ny, nd) = match anchor_y {
+                                Some(ay) => {
+                                    let d = (snap_wy - ay).abs().max(1.0);
+                                    let y = if snap_wy < ay { ay - d } else { ay };
+                                    (y, d)
+                                }
+                                None => (r.y, r.depth),
+                            };
+                            self.project.update_room_rect(room_id, nx, ny, nw, nd);
+                        }
+                    }
+                    Drag2DState::DrawingWall {
+                        ref mut cur_wx,
+                        ref mut cur_wy,
+                        ..
+                    }
+                    | Drag2DState::DrawingRoom {
+                        ref mut cur_wx,
+                        ref mut cur_wy,
+                        ..
+                    }
+                    | Drag2DState::Measuring {
+                        ref mut cur_wx,
+                        ref mut cur_wy,
+                        ..
+                    } => {
+                        *cur_wx = snap_wx;
+                        *cur_wy = snap_wy;
+                    }
+                    Drag2DState::None => {}
                 }
             }
             "up" => {

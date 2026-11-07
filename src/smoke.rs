@@ -7,30 +7,40 @@ pub fn run(ui: &RenovaWindow) {
     let weak = ui.as_weak();
     slint::Timer::single_shot(std::time::Duration::from_millis(700), move || {
         let ui = weak.unwrap();
-        eprintln!("SMOKE: WINDOW SIZE = {:?}, SCALE = {:?}", ui.window().size(), ui.window().scale_factor());
+        eprintln!(
+            "SMOKE: WINDOW SIZE = {:?}, SCALE = {:?}",
+            ui.window().size(),
+            ui.window().scale_factor()
+        );
         // 1. Click Salon (5x4m)
         let pos1 = slint::LogicalPosition::new(200.0, 190.0);
-        ui.window().dispatch_event(slint::platform::WindowEvent::PointerMoved { position: pos1 });
-        ui.window().dispatch_event(slint::platform::WindowEvent::PointerPressed {
-            position: pos1,
-            button: slint::platform::PointerEventButton::Left,
-        });
-        ui.window().dispatch_event(slint::platform::WindowEvent::PointerReleased {
-            position: pos1,
-            button: slint::platform::PointerEventButton::Left,
-        });
+        ui.window()
+            .dispatch_event(slint::platform::WindowEvent::PointerMoved { position: pos1 });
+        ui.window()
+            .dispatch_event(slint::platform::WindowEvent::PointerPressed {
+                position: pos1,
+                button: slint::platform::PointerEventButton::Left,
+            });
+        ui.window()
+            .dispatch_event(slint::platform::WindowEvent::PointerReleased {
+                position: pos1,
+                button: slint::platform::PointerEventButton::Left,
+            });
 
         // 2. Click Cuisine (3.5x3m)
         let pos2 = slint::LogicalPosition::new(200.0, 240.0);
-        ui.window().dispatch_event(slint::platform::WindowEvent::PointerMoved { position: pos2 });
-        ui.window().dispatch_event(slint::platform::WindowEvent::PointerPressed {
-            position: pos2,
-            button: slint::platform::PointerEventButton::Left,
-        });
-        ui.window().dispatch_event(slint::platform::WindowEvent::PointerReleased {
-            position: pos2,
-            button: slint::platform::PointerEventButton::Left,
-        });
+        ui.window()
+            .dispatch_event(slint::platform::WindowEvent::PointerMoved { position: pos2 });
+        ui.window()
+            .dispatch_event(slint::platform::WindowEvent::PointerPressed {
+                position: pos2,
+                button: slint::platform::PointerEventButton::Left,
+            });
+        ui.window()
+            .dispatch_event(slint::platform::WindowEvent::PointerReleased {
+                position: pos2,
+                button: slint::platform::PointerEventButton::Left,
+            });
 
         step(ui.as_weak(), 0);
     });
