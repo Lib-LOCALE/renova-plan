@@ -6,6 +6,7 @@
 <p align="center">A native floor-plan and 3D home renovation planner for Linux.<br>Written in Rust, built with Slint, optimized for Wayland (Pop!_OS) and packaged as an offline Flatpak.</p>
 
 <p align="center">
+  <a href="https://github.com/Lib-LOCALE/renova-plan/actions/workflows/ci.yml"><img src="https://github.com/Lib-LOCALE/renova-plan/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/code-MIT-78e3cb" alt="Code: MIT"></a>
   <img src="https://img.shields.io/badge/platform-Linux%20Wayland%20%7C%20X11-orange" alt="Platform: Linux">
   <img src="https://img.shields.io/badge/built%20with-Slint%20%26%20Rust-blue" alt="Slint & Rust">
