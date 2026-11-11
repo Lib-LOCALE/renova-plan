@@ -38,6 +38,7 @@ export global Theme {
 component ActionButton inherits Rectangle {
     in property <string> text;
     in property <string> shortcut: "";
+    in property <color> dot-color: transparent;
     in property <bool> active: false;
     in property <bool> danger: false;
     in property <bool> emerald: false;
@@ -46,25 +47,34 @@ component ActionButton inherits Rectangle {
     in property <string> accessible-name: "";
     callback clicked();
 
-    min-height: 38px;
+    min-height: 36px;
     horizontal-stretch: 0;
-    border-radius: 8px;
-    border-width: active ? 2px : 1px;
+    border-radius: 6px;
+    border-width: active ? 1.5px : 1px;
     border-color: danger ? Theme.red : emerald ? Theme.green : amber-highlight ? Theme.amber : active ? Theme.accent : Theme.border;
     background: !enabled ? Theme.surface.darker(0.2) : touch.pressed ? Theme.hover.darker(0.12) : active ? (danger ? Theme.red : emerald ? Theme.green : amber-highlight ? Theme.amber : Theme.accent) : touch.has-hover ? Theme.hover : Theme.surface;
     opacity: enabled ? 1.0 : 0.45;
-    animate background { duration: 140ms; }
-    animate border-color { duration: 140ms; }
+    animate background { duration: 120ms; }
+    animate border-color { duration: 120ms; }
 
     accessible-role: button;
     accessible-label: root.accessible-name != "" ? root.accessible-name : text;
     accessible-action-default => { if root.enabled { root.clicked(); } }
 
     HorizontalLayout {
-        padding-left: 9px;
-        padding-right: 9px;
+        padding-left: 10px;
+        padding-right: 10px;
         spacing: 6px;
         alignment: center;
+
+        if root.dot-color != transparent: Rectangle {
+            width: 7px;
+            height: 7px;
+            border-radius: 3.5px;
+            background: root.dot-color;
+            y: (parent.height - self.height) / 2;
+        }
+
         Text {
             text: root.text;
             color: root.active ? (
@@ -74,7 +84,7 @@ component ActionButton inherits Rectangle {
                 Theme.on-accent
             ) : root.danger ? Theme.red : root.emerald ? Theme.green : Theme.text;
             font-size: Theme.base-font;
-            font-weight: root.active ? 700 : 600;
+            font-weight: root.active ? 700 : 500;
             horizontal-alignment: center;
             vertical-alignment: center;
             overflow: elide;
@@ -82,11 +92,11 @@ component ActionButton inherits Rectangle {
         if root.shortcut != "": Rectangle {
             height: 18px;
             border-radius: 4px;
-            background: root.active ? #ffffff2e : Theme.border;
+            background: root.active ? #ffffff28 : Theme.border;
             y: (parent.height - self.height) / 2;
             HorizontalLayout {
-                padding-left: 4px;
-                padding-right: 4px;
+                padding-left: 5px;
+                padding-right: 5px;
                 Text {
                     text: root.shortcut;
                     font-size: 10px;
@@ -106,58 +116,51 @@ component ActionButton inherits Rectangle {
 }
 
 component DockTab inherits Rectangle {
-    in property <string> icon-text;
+    in property <image> icon;
     in property <string> label;
     in property <bool> active: false;
     callback clicked();
 
     min-height: 62px;
-    border-radius: 10px;
-    border-width: active ? 2px : 1px;
+    border-radius: 8px;
+    border-width: active ? 1.5px : 1px;
     border-color: active ? Theme.accent : Theme.border;
     background: active ? Theme.accent : touch.has-hover ? Theme.hover : Theme.surface;
-    animate background { duration: 140ms; }
+    animate background { duration: 120ms; }
+    animate border-color { duration: 120ms; }
 
     accessible-role: button;
     accessible-label: label;
     accessible-action-default => { root.clicked(); }
 
     VerticalLayout {
-        padding: 6px;
-        spacing: 3px;
+        padding: 8px;
+        spacing: 5px;
         alignment: center;
-        Text {
-            text: root.icon-text;
-            color: root.active ? Theme.on-accent : Theme.accent;
-            font-size: Theme.title-font;
-            font-weight: 800;
+        Image {
+            width: 20px;
+            height: 20px;
+            source: root.icon;
+            colorize: root.active ? Theme.on-accent : Theme.accent;
             horizontal-alignment: center;
         }
         Text {
             text: root.label;
             color: root.active ? Theme.on-accent : Theme.text;
             font-size: Theme.small-font;
-            font-weight: root.active ? 700 : 600;
+            font-weight: root.active ? 700 : 500;
             horizontal-alignment: center;
-            wrap: word-wrap;
+            overflow: elide;
         }
     }
 
     touch := TouchArea {
-        width: parent.width;
-        height: parent.height;
-        pointer-event(e) => {
-            debug("ToolItem pointer-event:", root.label, e);
-        }
-        clicked => {
-            debug("ToolItem clicked:", root.label);
-            root.clicked();
-        }
+        clicked => { root.clicked(); }
     }
 }
 
 component ToolItem inherits Rectangle {
-    in property <string> icon-text: "•";
+    in property <image> icon;
     in property <string> label;
     in property <string> shortcut: "";
     in property <bool> active: false;
@@ -166,13 +169,13 @@ component ToolItem inherits Rectangle {
     in property <string> accessible-name: "";
     callback clicked();
 
-    min-height: 44px;
-    border-radius: 8px;
+    min-height: 40px;
+    border-radius: 6px;
     background: active ? (danger ? Theme.red : emerald ? Theme.green : Theme.accent) : touch.has-hover ? Theme.hover : Theme.surface;
-    border-width: active ? 2px : 1px;
-    border-color: active ? (danger ? Theme.red : emerald ? Theme.green : Theme.accent) : danger ? Theme.red : emerald ? Theme.green : Theme.border;
-    animate background { duration: 140ms; }
-    animate border-color { duration: 140ms; }
+    border-width: active ? 1.5px : 1px;
+    border-color: active ? (danger ? Theme.red : emerald ? Theme.green : Theme.accent) : Theme.border;
+    animate background { duration: 120ms; }
+    animate border-color { duration: 120ms; }
 
     accessible-role: button;
     accessible-label: root.accessible-name != "" ? root.accessible-name : label;
@@ -181,43 +184,39 @@ component ToolItem inherits Rectangle {
     HorizontalLayout {
         padding-left: 10px;
         padding-right: 10px;
-        spacing: 8px;
-        Rectangle {
-            width: 26px;
-            height: 26px;
+        spacing: 10px;
+        alignment: center;
+
+        Image {
+            width: 18px;
+            height: 18px;
+            source: root.icon;
+            colorize: root.active ? (Theme.text == #18181b ? #ffffff : #0f172a) : root.danger ? Theme.red : root.emerald ? Theme.green : Theme.accent;
             y: (parent.height - self.height) / 2;
-            border-radius: 6px;
-            background: root.active ? #ffffff28 : Theme.panel;
-            Text {
-                text: root.icon-text;
-                color: root.active ? (Theme.text == #18181b ? #ffffff : #0f172a) : root.danger ? Theme.red : root.emerald ? Theme.green : Theme.accent;
-                font-size: Theme.base-font;
-                font-weight: 800;
-                horizontal-alignment: center;
-                vertical-alignment: center;
-            }
         }
+
         Text {
             text: root.label;
             color: root.active ? (
                 root.danger ? (Theme.text == #18181b ? #ffffff : #0f172a) :
                 root.emerald ? (Theme.text == #18181b ? #ffffff : #0f172a) :
                 Theme.on-accent
-            ) : root.emerald ? Theme.green : Theme.text;
+            ) : Theme.text;
             font-size: Theme.base-font;
-            font-weight: root.active ? 700 : 600;
+            font-weight: root.active ? 700 : 500;
             vertical-alignment: center;
             horizontal-stretch: 1;
-            wrap: word-wrap;
+            overflow: elide;
         }
+
         if root.shortcut != "": Rectangle {
             height: 18px;
             border-radius: 4px;
-            background: root.active ? #ffffff2e : Theme.border;
+            background: root.active ? #ffffff28 : Theme.border;
             y: (parent.height - self.height) / 2;
             HorizontalLayout {
-                padding-left: 4px;
-                padding-right: 4px;
+                padding-left: 5px;
+                padding-right: 5px;
                 Text {
                     text: root.shortcut;
                     font-size: 10px;
@@ -404,17 +403,17 @@ export component RenovaWindow inherits Window {
                 }
 
                 ActionButton {
-                    text: "⌂ " + root.tr("welcome_btn");
+                    text: root.tr("welcome_btn");
                     clicked => { root.show-welcome = true; }
                 }
 
                 ActionButton {
-                    text: "↶ " + root.tr("undo");
+                    text: root.tr("undo");
                     shortcut: "Ctrl+Z";
                     clicked => { root.action("undo"); }
                 }
                 ActionButton {
-                    text: "↷ " + root.tr("redo");
+                    text: root.tr("redo");
                     shortcut: "Ctrl+Y";
                     clicked => { root.action("redo"); }
                 }
@@ -447,24 +446,21 @@ export component RenovaWindow inherits Window {
                     clicked => { root.phase-index = 1; root.action("refresh"); }
                 }
                 ActionButton {
-                    text: root.tr("phase_after");
-                    active: root.phase-index == 2;
-                    emerald: root.phase-index == 2;
-                    clicked => { root.phase-index = 2; root.action("refresh"); }
-                }
-                ActionButton {
                     text: root.tr("phase_chantier");
                     active: root.phase-index == 0;
-                    amber-highlight: root.phase-index == 0;
                     clicked => { root.phase-index = 0; root.action("refresh"); }
+                }
+                ActionButton {
+                    text: root.tr("phase_after");
+                    active: root.phase-index == 2;
+                    clicked => { root.phase-index = 2; root.action("refresh"); }
                 }
 
                 Rectangle { horizontal-stretch: 1; }
 
-                // Badge Budget en direct dans la barre supérieure (cliquer ouvre le détail des prix)
+                // Badge Budget dans la barre supérieure
                 ActionButton {
-                    text: root.kpi-carrez + " • " + root.kpi-total-cost;
-                    amber-highlight: true;
+                    text: root.kpi-carrez + "  •  " + root.kpi-total-cost;
                     active: root.guided-step == 3;
                     clicked => { root.guided-step = 3; }
                 }
@@ -511,7 +507,7 @@ export component RenovaWindow inherits Window {
                     spacing: 8px;
 
                     DockTab {
-                        icon-text: "▢";
+                        icon: @image-url("../icons/tab-plan.svg");
                         label: root.tr("step_1");
                         active: root.guided-step == 0;
                         clicked => {
@@ -521,7 +517,7 @@ export component RenovaWindow inherits Window {
                         }
                     }
                     DockTab {
-                        icon-text: "⊞";
+                        icon: @image-url("../icons/tab-openings.svg");
                         label: root.tr("step_2");
                         active: root.guided-step == 1;
                         clicked => {
@@ -531,7 +527,7 @@ export component RenovaWindow inherits Window {
                         }
                     }
                     DockTab {
-                        icon-text: "✥";
+                        icon: @image-url("../icons/tab-furniture.svg");
                         label: root.tr("step_3");
                         active: root.guided-step == 2;
                         clicked => {
@@ -541,7 +537,7 @@ export component RenovaWindow inherits Window {
                         }
                     }
                     DockTab {
-                        icon-text: "€";
+                        icon: @image-url("../icons/tab-estimate.svg");
                         label: root.tr("step_4");
                         active: root.guided-step == 3;
                         clicked => {
@@ -600,27 +596,23 @@ export component RenovaWindow inherits Window {
                             font-weight: 700;
                         }
                         ToolItem {
-                            icon-text: "+";
+                            icon: @image-url("../icons/tool-room.svg");
                             label: root.tr("quick_living");
-                            emerald: true;
                             clicked => { root.action("quick:living"); }
                         }
                         ToolItem {
-                            icon-text: "+";
+                            icon: @image-url("../icons/tool-room.svg");
                             label: root.tr("quick_kitchen");
-                            emerald: true;
                             clicked => { root.action("quick:kitchen"); }
                         }
                         ToolItem {
-                            icon-text: "+";
+                            icon: @image-url("../icons/tool-room.svg");
                             label: root.tr("quick_bedroom");
-                            emerald: true;
                             clicked => { root.action("quick:bedroom"); }
                         }
                         ToolItem {
-                            icon-text: "+";
+                            icon: @image-url("../icons/tool-room.svg");
                             label: root.tr("quick_bathroom");
-                            emerald: true;
                             clicked => { root.action("quick:bathroom"); }
                         }
                         HorizontalLayout {
@@ -628,13 +620,11 @@ export component RenovaWindow inherits Window {
                             ActionButton {
                                 horizontal-stretch: 1;
                                 text: root.tr("quick_hallway");
-                                emerald: true;
                                 clicked => { root.action("quick:hallway"); }
                             }
                             ActionButton {
                                 horizontal-stretch: 1;
                                 text: root.tr("quick_office");
-                                emerald: true;
                                 clicked => { root.action("quick:office"); }
                             }
                         }
@@ -643,13 +633,11 @@ export component RenovaWindow inherits Window {
                             ActionButton {
                                 horizontal-stretch: 1;
                                 text: root.tr("quick_wc");
-                                emerald: true;
                                 clicked => { root.action("quick:wc"); }
                             }
                             ActionButton {
                                 horizontal-stretch: 1;
                                 text: root.tr("quick_garage");
-                                emerald: true;
                                 clicked => { root.action("quick:garage"); }
                             }
                         }
@@ -663,14 +651,14 @@ export component RenovaWindow inherits Window {
                             font-weight: 700;
                         }
                         ToolItem {
-                            icon-text: "✥";
+                            icon: @image-url("../icons/tool-select.svg");
                             label: root.tr("tool_select");
                             shortcut: "V";
                             active: root.active-tool == "select";
                             clicked => { root.active-tool = "select"; root.action("tool:select"); }
                         }
                         ToolItem {
-                            icon-text: "▢";
+                            icon: @image-url("../icons/tool-room.svg");
                             label: root.tr("tool_boxed_room");
                             shortcut: "R";
                             active: root.active-tool == "boxed_room";
@@ -681,7 +669,7 @@ export component RenovaWindow inherits Window {
                             }
                         }
                         ToolItem {
-                            icon-text: "┃";
+                            icon: @image-url("../icons/tool-partition.svg");
                             label: root.tr("tool_partition");
                             shortcut: "P";
                             active: root.active-tool == "partition";
@@ -692,7 +680,7 @@ export component RenovaWindow inherits Window {
                             }
                         }
                         ToolItem {
-                            icon-text: "✕";
+                            icon: @image-url("../icons/tool-demolish.svg");
                             label: root.tr("tool_demolish_click");
                             danger: true;
                             active: root.active-tool == "demolish_click";
@@ -703,7 +691,7 @@ export component RenovaWindow inherits Window {
                             }
                         }
                         ToolItem {
-                            icon-text: "[M]";
+                            icon: @image-url("../icons/tool-measure.svg");
                             label: root.tr("tool_measure");
                             shortcut: "M";
                             active: root.active-tool == "measure";
@@ -735,45 +723,45 @@ export component RenovaWindow inherits Window {
                         Rectangle { height: 1px; background: Theme.border; }
 
                         ToolItem {
-                            icon-text: "P1";
+                            icon: @image-url("../icons/tool-door.svg");
                             label: root.tr("tool_door");
                             shortcut: "D";
                             active: root.active-tool == "door";
                             clicked => { root.active-tool = "door"; root.action("quick:door"); }
                         }
                         ToolItem {
-                            icon-text: "P2";
+                            icon: @image-url("../icons/tool-double-door.svg");
                             label: root.tr("tool_double_door");
                             active: root.active-tool == "double_door";
                             clicked => { root.active-tool = "double_door"; root.action("quick:double_door"); }
                         }
                         ToolItem {
-                            icon-text: "<>";
+                            icon: @image-url("../icons/tool-sliding-door.svg");
                             label: root.tr("tool_sliding_door");
                             active: root.active-tool == "sliding_door";
                             clicked => { root.active-tool = "sliding_door"; root.action("quick:sliding_door"); }
                         }
                         ToolItem {
-                            icon-text: "∏";
+                            icon: @image-url("../icons/tool-passage.svg");
                             label: root.tr("tool_passage");
                             active: root.active-tool == "passage";
                             clicked => { root.active-tool = "passage"; root.action("quick:passage"); }
                         }
                         ToolItem {
-                            icon-text: "⊞";
+                            icon: @image-url("../icons/tool-window.svg");
                             label: root.tr("tool_window");
                             shortcut: "F";
                             active: root.active-tool == "window";
                             clicked => { root.active-tool = "window"; root.action("quick:window"); }
                         }
                         ToolItem {
-                            icon-text: "⊟";
+                            icon: @image-url("../icons/tool-small-window.svg");
                             label: root.tr("tool_small_window");
                             active: root.active-tool == "small_window";
                             clicked => { root.active-tool = "small_window"; root.action("quick:small_window"); }
                         }
                         ToolItem {
-                            icon-text: "⊞⊞";
+                            icon: @image-url("../icons/tool-bay-window.svg");
                             label: root.tr("tool_bay_window");
                             active: root.active-tool == "bay_window";
                             clicked => { root.active-tool = "bay_window"; root.action("quick:bay_window"); }
@@ -942,7 +930,7 @@ export component RenovaWindow inherits Window {
                         }
 
                         ActionButton {
-                            text: "▸ " + root.tr("welcome_save");
+                            text: root.tr("welcome_save");
                             shortcut: "Ctrl+S";
                             clicked => { root.action("project:save"); }
                         }
@@ -950,15 +938,12 @@ export component RenovaWindow inherits Window {
                             spacing: 6px;
                             ActionButton {
                                 horizontal-stretch: 1;
-                                text: "SVG";
-                                active: true;
+                                text: "Export SVG";
                                 clicked => { root.action("export:svg"); }
                             }
                             ActionButton {
                                 horizontal-stretch: 1;
-                                text: "CSV";
-                                emerald: true;
-                                active: true;
+                                text: "Export CSV";
                                 clicked => { root.action("export:csv"); }
                             }
                         }
@@ -1235,20 +1220,23 @@ export component RenovaWindow inherits Window {
 
                         Rectangle { horizontal-stretch: 1; }
 
-                        // Statut Rénovation en 1 clic (symboles inclus pour accessibilité WCAG)
+                        // Statut Rénovation en 1 clic (point coloré sobre, aucun emoji)
                         ActionButton {
-                            text: "✓ " + root.tr("status_existing");
+                            dot-color: Theme.muted;
+                            text: root.tr("status_existing");
                             active: root.sel-status == 0;
                             clicked => { root.action("sel:status:0"); }
                         }
                         ActionButton {
-                            text: "✕ " + root.tr("status_demolish");
+                            dot-color: Theme.red;
+                            text: root.tr("status_demolish");
                             danger: true;
                             active: root.sel-status == 1;
                             clicked => { root.action("sel:status:1"); }
                         }
                         ActionButton {
-                            text: "+ " + root.tr("status_new");
+                            dot-color: Theme.green;
+                            text: root.tr("status_new");
                             emerald: true;
                             active: root.sel-status == 2;
                             clicked => { root.action("sel:status:2"); }
@@ -1266,16 +1254,16 @@ export component RenovaWindow inherits Window {
                             clicked => { root.action("sel:len:+"); }
                         }
                         ActionButton {
-                            text: "↻ " + root.tr("btn_rotate");
+                            text: root.tr("btn_rotate");
                             shortcut: "T";
                             clicked => { root.action("sel:rotate"); }
                         }
                         ActionButton {
-                            text: "+ " + root.tr("btn_duplicate");
+                            text: root.tr("btn_duplicate");
                             clicked => { root.action("sel:duplicate"); }
                         }
                         ActionButton {
-                            text: "✕ " + root.tr("btn_delete");
+                            text: root.tr("btn_delete");
                             shortcut: "Suppr";
                             danger: true;
                             clicked => { root.action("sel:delete"); }
@@ -1295,35 +1283,32 @@ export component RenovaWindow inherits Window {
                         padding-right: 14px;
                         spacing: 16px;
 
-                        Text {
-                            text: "✓ " + root.tr("legend_existing");
-                            color: Theme.muted;
-                            font-size: Theme.small-font;
-                            font-weight: 600;
-                            vertical-alignment: center;
+                        HorizontalLayout {
+                            spacing: 6px;
+                            alignment: center;
+                            Rectangle { width: 8px; height: 8px; border-radius: 4px; background: Theme.muted; y: (parent.height - self.height) / 2; }
+                            Text { text: root.tr("legend_existing"); color: Theme.muted; font-size: Theme.small-font; font-weight: 600; vertical-alignment: center; }
                         }
-                        Text {
-                            text: "✕ " + root.tr("legend_demolish");
-                            color: Theme.red;
-                            font-size: Theme.small-font;
-                            font-weight: 700;
-                            vertical-alignment: center;
+                        HorizontalLayout {
+                            spacing: 6px;
+                            alignment: center;
+                            Rectangle { width: 8px; height: 8px; border-radius: 4px; background: Theme.red; y: (parent.height - self.height) / 2; }
+                            Text { text: root.tr("legend_demolish"); color: Theme.red; font-size: Theme.small-font; font-weight: 600; vertical-alignment: center; }
                         }
-                        Text {
-                            text: "+ " + root.tr("legend_new");
-                            color: Theme.green;
-                            font-size: Theme.small-font;
-                            font-weight: 700;
-                            vertical-alignment: center;
+                        HorizontalLayout {
+                            spacing: 6px;
+                            alignment: center;
+                            Rectangle { width: 8px; height: 8px; border-radius: 4px; background: Theme.green; y: (parent.height - self.height) / 2; }
+                            Text { text: root.tr("legend_new"); color: Theme.green; font-size: Theme.small-font; font-weight: 600; vertical-alignment: center; }
                         }
 
                         Rectangle { horizontal-stretch: 1; }
 
                         if root.toast-message != "": Text {
                             text: root.toast-message;
-                            color: Theme.amber;
+                            color: Theme.accent;
                             font-size: Theme.base-font;
-                            font-weight: 800;
+                            font-weight: 700;
                             vertical-alignment: center;
                         }
 
@@ -1331,7 +1316,7 @@ export component RenovaWindow inherits Window {
                             text: root.status-hint;
                             color: Theme.text;
                             font-size: Theme.small-font;
-                            font-weight: 600;
+                            font-weight: 500;
                             vertical-alignment: center;
                             overflow: elide;
                         }
@@ -1393,7 +1378,7 @@ export component RenovaWindow inherits Window {
                             padding: 16px;
                             spacing: 10px;
                             Text {
-                                text: "⌂ " + root.tr("card_house_title");
+                                text: root.tr("card_house_title");
                                 color: Theme.text;
                                 font-size: Theme.title-font;
                                 font-weight: 800;
@@ -1426,7 +1411,7 @@ export component RenovaWindow inherits Window {
                             padding: 16px;
                             spacing: 10px;
                             Text {
-                                text: "⊞ " + root.tr("card_studio_title");
+                                text: root.tr("card_studio_title");
                                 color: Theme.text;
                                 font-size: Theme.title-font;
                                 font-weight: 800;
@@ -1441,7 +1426,6 @@ export component RenovaWindow inherits Window {
                             }
                             ActionButton {
                                 text: root.tr("card_open_btn");
-                                emerald: true;
                                 active: true;
                                 clicked => {
                                     root.request-preset("preset:studio");
@@ -1460,7 +1444,7 @@ export component RenovaWindow inherits Window {
                             padding: 16px;
                             spacing: 10px;
                             Text {
-                                text: "▢ " + root.tr("card_blank_title");
+                                text: root.tr("card_blank_title");
                                 color: Theme.text;
                                 font-size: Theme.title-font;
                                 font-weight: 800;
@@ -1498,7 +1482,6 @@ export component RenovaWindow inherits Window {
                         horizontal-stretch: 1;
                         text: root.tr("welcome_load");
                         shortcut: "Ctrl+O";
-                        emerald: true;
                         clicked => {
                             root.request-preset("project:load");
                         }
