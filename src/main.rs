@@ -1878,8 +1878,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             s_key.borrow_mut().handle_action(&ui, "sel:delete");
             return EventResult::PreventDefault;
         }
+        if matches!(event.logical_key, NativeKey::Named(NamedKey::F1)) {
+            ui.set_show_about(!ui.get_show_about());
+            return EventResult::PreventDefault;
+        }
         if let NativeKey::Character(ch) = &event.logical_key {
             let lower = ch.to_lowercase();
+            if lower == "?" {
+                ui.set_show_about(!ui.get_show_about());
+                return EventResult::PreventDefault;
+            }
             if modifiers.control_key() || modifiers.super_key() {
                 if modifiers.shift_key() && lower == "s" {
                     s_key.borrow_mut().handle_action(&ui, "project:save_as");

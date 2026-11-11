@@ -1235,20 +1235,20 @@ export component RenovaWindow inherits Window {
 
                         Rectangle { horizontal-stretch: 1; }
 
-                        // Statut Rénovation en 1 clic
+                        // Statut Rénovation en 1 clic (symboles inclus pour accessibilité WCAG)
                         ActionButton {
-                            text: root.tr("status_existing");
+                            text: "✓ " + root.tr("status_existing");
                             active: root.sel-status == 0;
                             clicked => { root.action("sel:status:0"); }
                         }
                         ActionButton {
-                            text: root.tr("status_demolish");
+                            text: "✕ " + root.tr("status_demolish");
                             danger: true;
                             active: root.sel-status == 1;
                             clicked => { root.action("sel:status:1"); }
                         }
                         ActionButton {
-                            text: root.tr("status_new");
+                            text: "+ " + root.tr("status_new");
                             emerald: true;
                             active: root.sel-status == 2;
                             clicked => { root.action("sel:status:2"); }
@@ -1523,39 +1523,98 @@ export component RenovaWindow inherits Window {
         TouchArea { clicked => { root.show-about = false; } }
 
         Rectangle {
-            width: 480px;
-            height: 360px;
+            width: 640px;
+            height: 520px;
             x: (parent.width - self.width) / 2;
             y: (parent.height - self.height) / 2;
             background: Theme.panel;
-            border-radius: 12px;
+            border-radius: 14px;
             border-width: 2px;
             border-color: Theme.accent;
 
             TouchArea {}
 
             VerticalLayout {
-                padding: 20px;
-                spacing: 10px;
-                Text {
-                    text: root.tr("app_title");
-                    color: Theme.accent;
-                    font-size: Theme.title-font;
-                    font-weight: 800;
-                    horizontal-alignment: center;
+                padding: 24px;
+                spacing: 12px;
+
+                HorizontalLayout {
+                    alignment: space-between;
+                    Text {
+                        text: "RenovaPlan v0.1.0";
+                        color: Theme.accent;
+                        font-size: Theme.title-font;
+                        font-weight: 800;
+                        vertical-alignment: center;
+                    }
+                    ActionButton {
+                        text: "✕ " + root.tr("btn_close");
+                        clicked => { root.show-about = false; }
+                    }
                 }
+
                 Text {
                     text: root.tr("subtitle");
                     color: Theme.text;
                     font-size: Theme.base-font;
-                    horizontal-alignment: center;
                     wrap: word-wrap;
                 }
-                AboutSlint {}
-                ActionButton {
-                    text: root.tr("btn_close");
-                    active: true;
-                    clicked => { root.show-about = false; }
+
+                Rectangle { height: 1px; background: Theme.border; }
+
+                Text {
+                    text: root.tr("help_step_heading");
+                    color: Theme.muted;
+                    font-size: Theme.small-font;
+                    font-weight: 700;
+                }
+                Text {
+                    text: root.tr("help_step_desc");
+                    color: Theme.text;
+                    font-size: Theme.base-font;
+                    wrap: word-wrap;
+                }
+
+                Rectangle { height: 1px; background: Theme.border; }
+
+                Text {
+                    text: root.tr("help_shortcuts_heading");
+                    color: Theme.muted;
+                    font-size: Theme.small-font;
+                    font-weight: 700;
+                }
+
+                HorizontalLayout {
+                    spacing: 16px;
+                    VerticalLayout {
+                        horizontal-stretch: 1;
+                        spacing: 5px;
+                        Text { text: "Ctrl+S : Sauvegarder (Save)"; color: Theme.text; font-size: Theme.small-font; }
+                        Text { text: "Ctrl+O : Ouvrir un plan (Open)"; color: Theme.text; font-size: Theme.small-font; }
+                        Text { text: "Ctrl+Z / Y : Annuler / Rétablir"; color: Theme.text; font-size: Theme.small-font; }
+                        Text { text: "V : Outil Sélection & Déplacement"; color: Theme.text; font-size: Theme.small-font; }
+                        Text { text: "R : Dessiner une pièce (Boxed room)"; color: Theme.text; font-size: Theme.small-font; }
+                        Text { text: "M : Mètre ruban (Mesure)"; color: Theme.text; font-size: Theme.small-font; }
+                    }
+                    VerticalLayout {
+                        horizontal-stretch: 1;
+                        spacing: 5px;
+                        Text { text: "W : Mur porteur 25 cm (Wall)"; color: Theme.text; font-size: Theme.small-font; }
+                        Text { text: "P : Cloison 10 cm (Partition)"; color: Theme.text; font-size: Theme.small-font; }
+                        Text { text: "D : Poser une porte simple (Door)"; color: Theme.text; font-size: Theme.small-font; }
+                        Text { text: "F : Poser une fenêtre (Window)"; color: Theme.text; font-size: Theme.small-font; }
+                        Text { text: "T : Pivoter l'objet sélectionné"; color: Theme.text; font-size: Theme.small-font; }
+                        Text { text: "Suppr : Supprimer la sélection"; color: Theme.text; font-size: Theme.small-font; }
+                    }
+                }
+
+                Rectangle { vertical-stretch: 1; }
+
+                Text {
+                    text: root.tr("help_offline_badge");
+                    color: Theme.muted;
+                    font-size: 11px;
+                    horizontal-alignment: center;
                 }
             }
         }

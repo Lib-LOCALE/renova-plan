@@ -152,7 +152,12 @@
     "confirm_replace_msg": "Votre plan actuel contient des modifications non enregistrées. Voulez-vous sauvegarder votre travail avant d'ouvrir ce modèle ?",
     "confirm_save_first": "Sauvegarder d'abord",
     "confirm_discard": "Écraser sans sauver",
-    "confirm_cancel": "Annuler"
+    "confirm_cancel": "Annuler",
+    "help_title": "RenovaPlan — Aide & Raccourcis",
+    "help_step_heading": "LES 4 ÉTAPES D'UN PROJET DE RÉNOVATION",
+    "help_step_desc": "1. Créez vos pièces en 1 clic ou tracez vos murs. 2. Posez vos ouvertures sur les cloisons. 3. Aménagez avec le catalogue de mobilier. 4. Obtenez le devis estimatif automatique.",
+    "help_shortcuts_heading": "RACCOURCIS CLAVIER PRINCIPAUX",
+    "help_offline_badge": "Moteur 100% Rust & Slint • Conçu pour Windows 11 x64 • 100% Hors-ligne"
   },
   "en": {
     "app_title": "RenovaPlan — Easy Home Renovation Planner",
@@ -307,6 +312,11 @@
     "confirm_replace_msg": "Your current plan contains unsaved changes. Would you like to save your work before opening this template?",
     "confirm_save_first": "Save first",
     "confirm_discard": "Discard & Replace",
-    "confirm_cancel": "Cancel"
+    "confirm_cancel": "Cancel",
+    "help_title": "RenovaPlan — Help & Shortcuts",
+    "help_step_heading": "THE 4 STEPS OF A RENOVATION PROJECT",
+    "help_step_desc": "1. Add rooms in 1 click or draw walls. 2. Place doors & windows onto walls. 3. Furnish from catalog. 4. Review automatic cost estimate & Bill of Quantities.",
+    "help_shortcuts_heading": "MAIN KEYBOARD SHORTCUTS",
+    "help_offline_badge": "100% Rust & Slint Engine • Built for Windows 11 x64 • 100% Offline"
   }
 }
