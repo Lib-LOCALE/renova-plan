@@ -37,11 +37,13 @@ export global Theme {
 
 component ActionButton inherits Rectangle {
     in property <string> text;
+    in property <string> shortcut: "";
     in property <bool> active: false;
     in property <bool> danger: false;
     in property <bool> emerald: false;
     in property <bool> amber-highlight: false;
     in property <bool> enabled: true;
+    in property <string> accessible-name: "";
     callback clicked();
 
     min-height: 38px;
@@ -52,21 +54,48 @@ component ActionButton inherits Rectangle {
     background: !enabled ? Theme.surface.darker(0.2) : touch.pressed ? Theme.hover.darker(0.12) : active ? (danger ? Theme.red : emerald ? Theme.green : amber-highlight ? Theme.amber : Theme.accent) : touch.has-hover ? Theme.hover : Theme.surface;
     opacity: enabled ? 1.0 : 0.45;
     animate background { duration: 140ms; }
+    animate border-color { duration: 140ms; }
 
     accessible-role: button;
-    accessible-label: text;
+    accessible-label: root.accessible-name != "" ? root.accessible-name : text;
     accessible-action-default => { if root.enabled { root.clicked(); } }
 
     HorizontalLayout {
         padding-left: 9px;
         padding-right: 9px;
+        spacing: 6px;
+        alignment: center;
         Text {
             text: root.text;
-            color: root.active ? (root.danger || root.emerald || root.amber-highlight ? #ffffff : Theme.on-accent) : root.danger ? Theme.red : root.emerald ? Theme.green : Theme.text;
+            color: root.active ? (
+                root.amber-highlight ? #0f172a :
+                root.emerald ? (Theme.text == #18181b ? #ffffff : #0f172a) :
+                root.danger ? (Theme.text == #18181b ? #ffffff : #0f172a) :
+                Theme.on-accent
+            ) : root.danger ? Theme.red : root.emerald ? Theme.green : Theme.text;
             font-size: Theme.base-font;
             font-weight: root.active ? 700 : 600;
             horizontal-alignment: center;
             vertical-alignment: center;
+            overflow: elide;
+        }
+        if root.shortcut != "": Rectangle {
+            height: 18px;
+            border-radius: 4px;
+            background: root.active ? #ffffff2e : Theme.border;
+            y: (parent.height - self.height) / 2;
+            HorizontalLayout {
+                padding-left: 4px;
+                padding-right: 4px;
+                Text {
+                    text: root.shortcut;
+                    font-size: 10px;
+                    font-weight: 700;
+                    color: root.active ? (Theme.text == #18181b ? #ffffff : #0f172a) : Theme.muted;
+                    vertical-alignment: center;
+                    horizontal-alignment: center;
+                }
+            }
         }
     }
 
@@ -134,6 +163,7 @@ component ToolItem inherits Rectangle {
     in property <bool> active: false;
     in property <bool> danger: false;
     in property <bool> emerald: false;
+    in property <string> accessible-name: "";
     callback clicked();
 
     min-height: 44px;
@@ -142,9 +172,10 @@ component ToolItem inherits Rectangle {
     border-width: active ? 2px : 1px;
     border-color: active ? (danger ? Theme.red : emerald ? Theme.green : Theme.accent) : danger ? Theme.red : emerald ? Theme.green : Theme.border;
     animate background { duration: 140ms; }
+    animate border-color { duration: 140ms; }
 
     accessible-role: button;
-    accessible-label: label;
+    accessible-label: root.accessible-name != "" ? root.accessible-name : label;
     accessible-action-default => { root.clicked(); }
 
     HorizontalLayout {
@@ -159,7 +190,7 @@ component ToolItem inherits Rectangle {
             background: root.active ? #ffffff28 : Theme.panel;
             Text {
                 text: root.icon-text;
-                color: root.active ? #ffffff : root.danger ? Theme.red : root.emerald ? Theme.green : Theme.accent;
+                color: root.active ? (Theme.text == #18181b ? #ffffff : #0f172a) : root.danger ? Theme.red : root.emerald ? Theme.green : Theme.accent;
                 font-size: Theme.base-font;
                 font-weight: 800;
                 horizontal-alignment: center;
@@ -168,12 +199,34 @@ component ToolItem inherits Rectangle {
         }
         Text {
             text: root.label;
-            color: root.active ? (root.danger || root.emerald ? #ffffff : Theme.on-accent) : root.emerald ? Theme.green : Theme.text;
+            color: root.active ? (
+                root.danger ? (Theme.text == #18181b ? #ffffff : #0f172a) :
+                root.emerald ? (Theme.text == #18181b ? #ffffff : #0f172a) :
+                Theme.on-accent
+            ) : root.emerald ? Theme.green : Theme.text;
             font-size: Theme.base-font;
             font-weight: root.active ? 700 : 600;
             vertical-alignment: center;
             horizontal-stretch: 1;
             wrap: word-wrap;
+        }
+        if root.shortcut != "": Rectangle {
+            height: 18px;
+            border-radius: 4px;
+            background: root.active ? #ffffff2e : Theme.border;
+            y: (parent.height - self.height) / 2;
+            HorizontalLayout {
+                padding-left: 4px;
+                padding-right: 4px;
+                Text {
+                    text: root.shortcut;
+                    font-size: 10px;
+                    font-weight: 700;
+                    color: root.active ? (Theme.text == #18181b ? #ffffff : #0f172a) : Theme.muted;
+                    vertical-alignment: center;
+                    horizontal-alignment: center;
+                }
+            }
         }
     }
 
@@ -218,7 +271,7 @@ export component RenovaWindow inherits Window {
     icon: @image-url("../icons/icon.png");
     preferred-width: 1420px;
     preferred-height: 860px;
-    min-width: 960px;
+    min-width: 1080px;
     min-height: 620px;
     max-width: 100000px;
     max-height: 100000px;
@@ -244,6 +297,23 @@ export component RenovaWindow inherits Window {
     in-out property <bool> expert-mode: false;
     in-out property <int> guided-step: 0;    // 0 = Pièces, 1 = Portes/Fenêtres, 2 = Meubles, 3 = Prix & Devis
     in-out property <bool> show-welcome: false;
+    in-out property <bool> has-unsaved-changes: false;
+    in-out property <bool> show-confirm-dialog: false;
+    in-out property <string> confirm-pending-action: "";
+    in-out property <string> confirm-title: "";
+    in-out property <string> confirm-message: "";
+
+    function request-preset(action-cmd: string) {
+        if (root.has-unsaved-changes) {
+            root.confirm-pending-action = action-cmd;
+            root.confirm-title = root.tr("confirm_replace_title");
+            root.confirm-message = root.tr("confirm_replace_msg");
+            root.show-confirm-dialog = true;
+        } else {
+            root.show-welcome = false;
+            root.action(action-cmd);
+        }
+    }
     in-out property <int> view-mode: 0;      // 0 = Plan 2D plein écran par défaut, 1 = 2D+3D, 2 = Vue 3D
     in-out property <int> phase-index: 0;    // 0 = Chantier, 1 = Before, 2 = After
     in-out property <int> active-status: 2;  // 0 = Existing, 1 = Demolish, 2 = New
@@ -340,10 +410,12 @@ export component RenovaWindow inherits Window {
 
                 ActionButton {
                     text: "↶ " + root.tr("undo");
+                    shortcut: "Ctrl+Z";
                     clicked => { root.action("undo"); }
                 }
                 ActionButton {
                     text: "↷ " + root.tr("redo");
+                    shortcut: "Ctrl+Y";
                     clicked => { root.action("redo"); }
                 }
 
@@ -406,7 +478,14 @@ export component RenovaWindow inherits Window {
                     }
                 }
                 ActionButton {
-                    text: root.theme-index == 1 ? "Clair" : root.theme-index == 0 ? "Sombre" : root.theme-index == 2 ? "Mocha" : "Nord";
+                    text: root.language-index == 0 ? "FR ▾" : "EN ▾";
+                    clicked => {
+                        root.language-index = root.language-index == 0 ? 1 : 0;
+                        root.action("lang:toggle");
+                    }
+                }
+                ActionButton {
+                    text: root.theme-index == 1 ? root.tr("theme_light") : root.theme-index == 0 ? root.tr("theme_dark") : root.theme-index == 2 ? root.tr("theme_mocha") : root.tr("theme_nord");
                     clicked => {
                         root.theme-index = Math.mod(root.theme-index + 1, 4);
                         root.action("theme:cycle");
@@ -476,6 +555,7 @@ export component RenovaWindow inherits Window {
 
                     ActionButton {
                         text: "?";
+                        accessible-name: root.tr("help_label");
                         clicked => { root.show-about = !root.show-about; }
                     }
                 }
@@ -547,13 +627,13 @@ export component RenovaWindow inherits Window {
                             spacing: 6px;
                             ActionButton {
                                 horizontal-stretch: 1;
-                                text: "+ Entrée 3×1,5";
+                                text: root.tr("quick_hallway");
                                 emerald: true;
                                 clicked => { root.action("quick:hallway"); }
                             }
                             ActionButton {
                                 horizontal-stretch: 1;
-                                text: "+ Bureau 3×2,5";
+                                text: root.tr("quick_office");
                                 emerald: true;
                                 clicked => { root.action("quick:office"); }
                             }
@@ -562,13 +642,13 @@ export component RenovaWindow inherits Window {
                             spacing: 6px;
                             ActionButton {
                                 horizontal-stretch: 1;
-                                text: "+ WC 1,5×1,2";
+                                text: root.tr("quick_wc");
                                 emerald: true;
                                 clicked => { root.action("quick:wc"); }
                             }
                             ActionButton {
                                 horizontal-stretch: 1;
-                                text: "+ Garage 5,5×3";
+                                text: root.tr("quick_garage");
                                 emerald: true;
                                 clicked => { root.action("quick:garage"); }
                             }
@@ -585,12 +665,14 @@ export component RenovaWindow inherits Window {
                         ToolItem {
                             icon-text: "✥";
                             label: root.tr("tool_select");
+                            shortcut: "V";
                             active: root.active-tool == "select";
                             clicked => { root.active-tool = "select"; root.action("tool:select"); }
                         }
                         ToolItem {
                             icon-text: "▢";
                             label: root.tr("tool_boxed_room");
+                            shortcut: "R";
                             active: root.active-tool == "boxed_room";
                             clicked => {
                                 root.active-status = 2;
@@ -601,6 +683,7 @@ export component RenovaWindow inherits Window {
                         ToolItem {
                             icon-text: "┃";
                             label: root.tr("tool_partition");
+                            shortcut: "P";
                             active: root.active-tool == "partition";
                             clicked => {
                                 root.active-status = 2;
@@ -622,6 +705,7 @@ export component RenovaWindow inherits Window {
                         ToolItem {
                             icon-text: "[M]";
                             label: root.tr("tool_measure");
+                            shortcut: "M";
                             active: root.active-tool == "measure";
                             clicked => { root.active-tool = "measure"; root.action("tool:measure"); }
                         }
@@ -653,6 +737,7 @@ export component RenovaWindow inherits Window {
                         ToolItem {
                             icon-text: "P1";
                             label: root.tr("tool_door");
+                            shortcut: "D";
                             active: root.active-tool == "door";
                             clicked => { root.active-tool = "door"; root.action("quick:door"); }
                         }
@@ -677,6 +762,7 @@ export component RenovaWindow inherits Window {
                         ToolItem {
                             icon-text: "⊞";
                             label: root.tr("tool_window");
+                            shortcut: "F";
                             active: root.active-tool == "window";
                             clicked => { root.active-tool = "window"; root.action("quick:window"); }
                         }
@@ -789,6 +875,8 @@ export component RenovaWindow inherits Window {
                                             y: (parent.height - self.height) / 2;
                                             border-radius: 6px;
                                             background: Theme.accent;
+                                            accessible-role: button;
+                                            accessible-label: root.tr("add_item_btn") + " " + item.label;
                                             Text {
                                                 text: "+ " + root.tr("add_item_btn");
                                                 color: Theme.on-accent;
@@ -855,6 +943,7 @@ export component RenovaWindow inherits Window {
 
                         ActionButton {
                             text: "▸ " + root.tr("welcome_save");
+                            shortcut: "Ctrl+S";
                             clicked => { root.action("project:save"); }
                         }
                         HorizontalLayout {
@@ -1178,6 +1267,7 @@ export component RenovaWindow inherits Window {
                         }
                         ActionButton {
                             text: "↻ " + root.tr("btn_rotate");
+                            shortcut: "T";
                             clicked => { root.action("sel:rotate"); }
                         }
                         ActionButton {
@@ -1186,6 +1276,7 @@ export component RenovaWindow inherits Window {
                         }
                         ActionButton {
                             text: "✕ " + root.tr("btn_delete");
+                            shortcut: "Suppr";
                             danger: true;
                             clicked => { root.action("sel:delete"); }
                         }
@@ -1205,21 +1296,21 @@ export component RenovaWindow inherits Window {
                         spacing: 16px;
 
                         Text {
-                            text: root.tr("legend_existing");
+                            text: "✓ " + root.tr("legend_existing");
                             color: Theme.muted;
                             font-size: Theme.small-font;
                             font-weight: 600;
                             vertical-alignment: center;
                         }
                         Text {
-                            text: root.tr("legend_demolish");
+                            text: "✕ " + root.tr("legend_demolish");
                             color: Theme.red;
                             font-size: Theme.small-font;
                             font-weight: 700;
                             vertical-alignment: center;
                         }
                         Text {
-                            text: root.tr("legend_new");
+                            text: "+ " + root.tr("legend_new");
                             color: Theme.green;
                             font-size: Theme.small-font;
                             font-weight: 700;
@@ -1319,8 +1410,7 @@ export component RenovaWindow inherits Window {
                                 text: root.tr("card_open_btn");
                                 active: true;
                                 clicked => {
-                                    root.show-welcome = false;
-                                    root.action("preset:house");
+                                    root.request-preset("preset:house");
                                 }
                             }
                         }
@@ -1354,8 +1444,7 @@ export component RenovaWindow inherits Window {
                                 emerald: true;
                                 active: true;
                                 clicked => {
-                                    root.show-welcome = false;
-                                    root.action("preset:studio");
+                                    root.request-preset("preset:studio");
                                 }
                             }
                         }
@@ -1387,8 +1476,7 @@ export component RenovaWindow inherits Window {
                             ActionButton {
                                 text: root.tr("card_open_btn");
                                 clicked => {
-                                    root.show-welcome = false;
-                                    root.action("preset:blank");
+                                    root.request-preset("preset:blank");
                                 }
                             }
                         }
@@ -1400,6 +1488,7 @@ export component RenovaWindow inherits Window {
                     ActionButton {
                         horizontal-stretch: 1;
                         text: root.tr("welcome_save");
+                        shortcut: "Ctrl+S";
                         clicked => {
                             root.show-welcome = false;
                             root.action("project:save");
@@ -1408,10 +1497,10 @@ export component RenovaWindow inherits Window {
                     ActionButton {
                         horizontal-stretch: 1;
                         text: root.tr("welcome_load");
+                        shortcut: "Ctrl+O";
                         emerald: true;
                         clicked => {
-                            root.show-welcome = false;
-                            root.action("project:load");
+                            root.request-preset("project:load");
                         }
                     }
                     ActionButton {
@@ -1464,9 +1553,89 @@ export component RenovaWindow inherits Window {
                 }
                 AboutSlint {}
                 ActionButton {
-                    text: "Fermer / Close (Échap)";
+                    text: root.tr("btn_close");
                     active: true;
                     clicked => { root.show-about = false; }
+                }
+            }
+        }
+    }
+
+    // ==================== DIALOGUE DE CONFIRMATION / PROTECTION DES DONNÉES ====================
+    if root.show-confirm-dialog: Rectangle {
+        width: parent.width;
+        height: parent.height;
+        background: #000000aa;
+
+        TouchArea { clicked => { root.show-confirm-dialog = false; } }
+
+        Rectangle {
+            width: 520px;
+            height: 250px;
+            x: (parent.width - self.width) / 2;
+            y: (parent.height - self.height) / 2;
+            background: Theme.panel;
+            border-radius: 14px;
+            border-width: 2px;
+            border-color: Theme.amber;
+
+            TouchArea {}
+
+            VerticalLayout {
+                padding: 24px;
+                spacing: 16px;
+
+                Text {
+                    text: "⚠ " + root.confirm-title;
+                    color: Theme.amber;
+                    font-size: Theme.title-font;
+                    font-weight: 800;
+                    horizontal-alignment: center;
+                }
+
+                Text {
+                    text: root.confirm-message;
+                    color: Theme.text;
+                    font-size: Theme.base-font;
+                    horizontal-alignment: center;
+                    wrap: word-wrap;
+                    vertical-stretch: 1;
+                }
+
+                HorizontalLayout {
+                    spacing: 10px;
+
+                    ActionButton {
+                        horizontal-stretch: 1;
+                        text: root.tr("confirm_save_first");
+                        active: true;
+                        emerald: true;
+                        clicked => {
+                            root.show-confirm-dialog = false;
+                            root.show-welcome = false;
+                            root.action("project:save");
+                            root.action(root.confirm-pending-action);
+                        }
+                    }
+
+                    ActionButton {
+                        horizontal-stretch: 1;
+                        text: root.tr("confirm_discard");
+                        danger: true;
+                        clicked => {
+                            root.show-confirm-dialog = false;
+                            root.show-welcome = false;
+                            root.action(root.confirm-pending-action);
+                        }
+                    }
+
+                    ActionButton {
+                        horizontal-stretch: 1;
+                        text: root.tr("confirm_cancel");
+                        clicked => {
+                            root.show-confirm-dialog = false;
+                        }
+                    }
                 }
             }
         }

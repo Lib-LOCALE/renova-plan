@@ -60,7 +60,11 @@ fn step(weak: slint::Weak<RenovaWindow>, index: usize) {
             .window()
             .take_snapshot()
             .expect("Capture du rendu natif Slint");
-        let prefix = std::env::var("RENOVA_SCREENSHOT").unwrap_or_else(|_| "/tmp/renova-v2".into());
+        let default_prefix = std::env::temp_dir()
+            .join("renova-v2")
+            .display()
+            .to_string();
+        let prefix = std::env::var("RENOVA_SCREENSHOT").unwrap_or(default_prefix);
         let path = format!("{prefix}-{}.ppm", names[index]);
         let mut bytes = format!("P6\n{} {}\n255\n", buffer.width(), buffer.height()).into_bytes();
         for pixel in buffer.as_slice() {

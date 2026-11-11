@@ -1,38 +1,67 @@
 # RenovaPlan — Product Definition
 
-## Vision
-**RenovaPlan** est un logiciel natif Linux (Slint + Rust, optimisé Wayland / Pop!_OS et distribué en Flatpak autonome) dédié à la conception de plans 2D cotés et à la visualisation 3D temps réel pour la rénovation de maison.
+<!-- impeccable:product-schema 1 -->
 
-Il combine la précision structurelle et l'autonomie hors-ligne de **Sweet Home 3D**, la clarté de rendu et de cotation de **RoomSketcher**, l'ergonomie immédiate de **Kozikaza**, et un système inédit pensé pour les chantiers de rénovation : la gestion des états de travaux (**Existant**, **Démolition**, **Création**), le **comparatif Avant / Projet / Chantier**, le **calque de fond mis à l'échelle**, et le **chiffrage / métré automatique** (surfaces Loi Carrez / Habitable, linéaires de murs, ouvertures, devis estimatif).
+## Platform
 
-## Utilisateurs Cibles
-- Particuliers rénovant une maison ou un appartement (abattage de cloisons, création de suite parentale, ouverture cuisine/séjour, aménagement d'étage).
-- Artisans, maîtres d'œuvre et architectes d'intérieur cherchant un outil rapide sur Linux (Wayland) pour relever l'existant, tester des variantes d'aménagement et chiffrer immédiatement les quantités de matériaux.
+adaptive
 
-## Fonctionnalités Clés
-1. **Plan 2D Technique Coté & Interactif** :
-   - Tracé de murs porteurs et cloisons avec magnétisme orthogonal et sur-grille (snapping).
-   - Cotations automatiques en centimètres / mètres et surfaces par pièce ($m^2$, Loi Carrez $h \ge 1{,}80\text{ m}$ vs surface au sol).
-   - Insertion intelligente de portes (battantes avec arc d'ouverture, coulissantes, doubles, ouvertures libres) et fenêtres (simples, doubles, baies vitrées, oscillo-battantes) qui s'encastrent sur les murs.
-   - Catalogue de mobilier et d'équipements (Cuisine, Salon, Chambre, Salle de bain, Technique/Électricité) avec rotation, redimensionnement au centimètre et glisser-déposer.
-   - Calque de fond (import d'image PNG ou grille d'architecte étalonnable) avec réglage d'opacité et d'échelle pour décalquer un plan existant.
+## Users
 
-2. **Mode Rénovation (Existant / Démolition / Création)** :
-   - Chaque mur, ouverture ou équipement possède un statut : **Existant conservé** (gris ardoise technique), **À démolir** (rouge chantier hachuré/pointillé), **Nouveau / À créer** (vert émeraude ou ambre).
-   - Filtre de phase instantané :
-     - **Vue Chantier (Tout)** : affiche l'existant, les démolitions en rouge et les créations en vert.
-     - **État Avant Rénovation** : affiche l'existant + les éléments qui seront démolis (masque les créations).
-     - **État Après Rénovation (Projet final)** : affiche l'existant conservé + les créations (masque les murs démolis).
+- **Particuliers en rénovation** : Propriétaires d'appartements ou de maisons planifiant des travaux d'aménagement intérieur (abattage de cloisons, création de suites parentales, réagencement cuisine/séjour, combles).
+- **Artisans, maîtres d'œuvre et architectes d'intérieur** : Professionnels recherchant un outil de conception rapide, fonctionnant à 100 % hors ligne sur PC Windows 11 et Linux, pour relever un existant, tester des variantes et chiffrer immédiatement les quantitatifs de chantier.
 
-3. **Vue 3D Temps Réel Synchronisée** :
-   - Vue 2D seule, Vue 3D seule, ou **Vue Scindée 2D + 3D côte-à-côte** mise à jour à chaque milliseconde.
-   - Caméra 3D Orbitale (rotation azimut, élévation, zoom, panoramique) + mode Coupe / Hauteur des murs et éclairage directionnel solaire avec ombres portées au sol.
-   - Rendu 3D des pièces (parquets, carrelages, bétons), des murs avec percements réels des portes et fenêtres (linteaux, allèges, vitrages translucides), et volumes 3D détaillés des meubles.
+## Product Purpose
 
-4. **Métré & Devis Estimatif Automatique** :
-   - Calcul temps réel : Surface habitable totale (Carrez), surface au sol, périmètre, surface nette de murs à peindre/enduire (déduction faite des ouvertures), linéaire de cloisons à démolir (et volume de gravats en $m^3$), linéaire de cloisons BA13 à créer, nombre d'ouvertures et budget total estimé (en `€` ou `$`).
-   - Export complet : Projet JSON natif, Plan vectoriel SVG coté, Capture PNG haute résolution (2D ou 3D), et Devis / Métré CSV/Markdown.
+RenovaPlan permet de concevoir des plans 2D cotés et de visualiser en 3D temps réel un aménagement intérieur, tout en automatisant le chiffrage et le métré des travaux grâce à la séparation rigoureuse des états de rénovation (**Existant**, **Démolition**, **Création**). Le succès se mesure à la vitesse de prise en main, à la précision des surfaces calculées (Loi Carrez) et à l'autonomie hors ligne totale.
 
-5. **Bilingue Français / Anglais & Palettes Linux** :
-   - Interface 100 % traduite à chaud en **Français** et **Anglais** (détection automatique de la locale système + sélecteur immédiat).
-   - Thèmes adaptés à Pop!_OS COSMIC et Linux : **Atelier Clair (Blueprint Paper)**, **COSMIC Sombre (Pop!_OS Dark)**, **Catppuccin Mocha**, **Ardoise Architecte (Nord)**.
+## Positioning
+
+RenovaPlan combine la précision structurelle de Sweet Home 3D, l'ergonomie moderne de Kozikaza et la clarté technique d'un plan d'architecte, sans aucun abonnement cloud, sans télémétrie, et avec un moteur dédié au chantier de rénovation : marquage des cloisons à abattre en rouge, nouvelles cloisons en vert, calcul immédiat du volume de gravats et devis estimatif instantané.
+
+## Operating Context
+
+- **Environnements d'exécution** : Ordinateurs de bureau et PC portables sous Windows 11 x64 (exécutable natif PE sans dépendances externes) et Linux (Wayland / Pop!_OS COSMIC / Flatpak).
+- **Conditions d'usage** : En atelier, sur table à dessin ou directement sur chantier sans connexion Internet.
+- **Affichage** : Optimisé pour écrans Full HD, QHD et 4K avec mode Grand Texte accessible.
+
+## Capabilities and Constraints
+
+- **Capacités clés** :
+  - Tracé 2D coté avec magnétisme sur grille et accrochage orthogonal.
+  - Calcul en temps réel de la surface Loi Carrez ($h \ge 1{,}80\text{ m}$), surface au sol, linéaires de cloisons à démolir/créer et surface de murs à peindre.
+  - Insertion intelligente de portes (battantes, doubles, coulissantes, passages libres) et fenêtres s'encastrant sur les cloisons.
+  - Rendu 3D orbital temps réel avec textures, percements réels de murs et réglage de hauteur de coupe.
+  - Devis estimatif chiffré par poste avec devises personnalisables.
+  - Export vectoriel SVG coté, devis CSV/Markdown et projet natif JSON.
+  - Bilingue temps réel Français / Anglais avec bascule à chaud.
+- **Contraintes techniques** :
+  - Moteur 100 % Rust (Slint + FemtoVG / Winit).
+  - Aucune dépendance réseau requise à l'exécution.
+  - Sauvegarde et préférences locales sécurisées dans `%APPDATA%\RenovaPlan\` (Windows) et `~/.config/RenovaPlan/` (Linux).
+
+## Brand Commitments
+
+- **Nom** : RenovaPlan.
+- **Ton & Identité** : Atelier d'architecture, chantier de précision, lisibilité géométrique absolue.
+- **Règles d'or** : Aucun artifice décoratif gratuit, aucun écran de chargement bloquant, aucune collecte de données personnelles.
+
+## Evidence on Hand
+
+- **Modèles de démarrage intégrés** : Maison familiale (110 m²), Appartement 2 pièces (48 m²), Canevas vierge structuré.
+- **Tests unitaires et d'intégration** : 9 tests automatisés couvrant les calculs géométriques, l'export SVG/CSV bilingue et la conformité des thèmes.
+- **Rendus d'interface vérifiés** : Snapshots réels du cycle complet (2D, 3D scindée, sélecteur de modèles, devis estimatif).
+
+## Product Principles
+
+1. **Autonomie locale absolue** : Les projets, devis et plans restent sous le contrôle exclusif de l'utilisateur sur son disque local.
+2. **Vérité de chantier** : Un plan n'est pas qu'un dessin, c'est une liste d'actions concrètes (conserver, démolir, construire) avec un impact financier direct.
+3. **Double regard instantané** : Synchronisation permanente milliseconde par milliseconde entre la rigueur du plan 2D coté et la projection 3D spatiale.
+4. **Accessibilité universelle** : Respect des contrastes WCAG AA, lisibilité sur tous les thèmes, raccourcis clavier natifs et interface bilingue complète.
+
+## Accessibility & Inclusion
+
+- Conforme WCAG 2.2 niveau AA (ratios de contraste de texte et boutons $\ge 4{,}5:1$ sur les 4 thèmes).
+- Double encodage des statuts chantier (couleur + symboles `✓`, `✕`, `+`) pour les utilisateurs daltoniens.
+- Mode « Grand Texte » agrandissant l'échelle typographique à 16–18 px.
+- Prise en charge native de la navigation clavier et des raccourcis universels (`Ctrl+S`, `Ctrl+O`, `Ctrl+Z`, `Échap`, `Suppr`).

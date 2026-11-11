@@ -35,10 +35,13 @@ pub struct Preferences {
 
 impl Default for Preferences {
     fn default() -> Self {
-        let locale = ["LC_ALL", "LC_MESSAGES", "LANG"]
-            .iter()
-            .filter_map(|k| std::env::var(k).ok())
-            .find(|s| !s.is_empty())
+        let locale = sys_locale::get_locale()
+            .or_else(|| {
+                ["LC_ALL", "LC_MESSAGES", "LANG"]
+                    .iter()
+                    .filter_map(|k| std::env::var(k).ok())
+                    .find(|s| !s.is_empty())
+            })
             .unwrap_or_default()
             .to_lowercase();
         let language = if locale.starts_with("en") { 1 } else { 0 };
@@ -51,40 +54,63 @@ impl Default for Preferences {
     }
 }
 
+fn preferences_base_dir() -> Option<PathBuf> {
+    #[cfg(windows)]
+    {
+        std::env::var_os("APPDATA")
+            .map(PathBuf::from)
+            .or_else(|| std::env::var_os("USERPROFILE").map(|p| PathBuf::from(p).join("AppData").join("Roaming")))
+    }
+    #[cfg(not(windows))]
+    {
+        std::env::var_os("XDG_CONFIG_HOME")
+            .map(PathBuf::from)
+            .filter(|p| p.is_absolute())
+            .or_else(|| std::env::var_os("HOME").map(|p| PathBuf::from(p).join(".config")))
+    }
+}
+
 fn preferences_path() -> Option<PathBuf> {
-    std::env::var_os("XDG_CONFIG_HOME")
-        .map(PathBuf::from)
-        .filter(|p| p.is_absolute())
-        .or_else(|| std::env::var_os("HOME").map(|p| PathBuf::from(p).join(".config")))
-        .map(|p| p.join("io.github.tonyboysuper.RenovaPlan/preferences.json"))
+    preferences_base_dir().map(|p| p.join("RenovaPlan").join("preferences.json"))
 }
 
 impl Preferences {
     pub fn load() -> Self {
-        if let Some(saved) = preferences_path()
-            .and_then(|p| std::fs::read(p).ok())
-            .and_then(|b| serde_json::from_slice::<Self>(&b).ok())
-        {
-            Self {
-                language: saved.language.min(1),
-                theme: saved.theme.min(3),
-                large_text: saved.large_text,
-                expert_mode: saved.expert_mode,
+        let try_paths = [
+            preferences_path(),
+            preferences_base_dir().map(|p| p.join("io.github.tonyboysuper.RenovaPlan").join("preferences.json")),
+        ];
+
+        for opt_p in try_paths {
+            if let Some(path) = opt_p
+                && let Ok(b) = std::fs::read(&path)
+                && let Ok(saved) = serde_json::from_slice::<Self>(&b)
+            {
+                return Self {
+                    language: saved.language.min(1),
+                    theme: saved.theme.min(3),
+                    large_text: saved.large_text,
+                    expert_mode: saved.expert_mode,
+                };
             }
-        } else {
-            Self::default()
         }
+        Self::default()
     }
 
     pub fn save(&self) -> Result<(), Box<dyn std::error::Error>> {
-        let path = preferences_path().ok_or("Répertoire XDG_CONFIG_HOME introuvable")?;
+        let path = preferences_path().ok_or("Répertoire de préférences introuvable")?;
         if let Some(parent) = path.parent() {
             std::fs::create_dir_all(parent)?;
         }
         let bytes = serde_json::to_vec_pretty(self)?;
         let temp = path.with_extension(format!("{}.tmp", std::process::id()));
-        std::fs::write(&temp, bytes)?;
-        std::fs::rename(temp, path)?;
+        std::fs::write(&temp, &bytes)?;
+        #[cfg(windows)]
+        let _ = std::fs::remove_file(&path);
+        if std::fs::rename(&temp, &path).is_err() {
+            std::fs::write(&path, &bytes)?;
+            let _ = std::fs::remove_file(&temp);
+        }
         Ok(())
     }
 }
@@ -207,5 +233,23 @@ mod tests {
             let _ = hex_color(p.panel);
             let _ = hex_color(p.accent);
         }
+    }
+
+    #[test]
+    fn preferences_path_and_save_load_work() {
+        let path = preferences_path();
+        assert!(path.is_some(), "preferences_path() should resolve on this platform");
+        let initial_prefs = Preferences {
+            language: 1,
+            theme: 2,
+            large_text: true,
+            expert_mode: true,
+        };
+        assert!(initial_prefs.save().is_ok(), "Preferences::save should succeed");
+        let loaded = Preferences::load();
+        assert_eq!(loaded.language, 1);
+        assert_eq!(loaded.theme, 2);
+        assert!(loaded.large_text);
+        assert!(loaded.expert_mode);
     }
 }
