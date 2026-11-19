@@ -55,7 +55,7 @@ It is a native desktop app: no account, no subscription, no telemetry. Your proj
 
 ## Install
 
-Build the desktop application using the instructions under **Build from source**.
+Download the Windows x64 installer, Debian package or Linux AppImage from the [latest release](https://github.com/Lib-LOCALE/renova-plan/releases/latest).
 
 On Windows the app relies on the WebView2 runtime, which ships with Windows 11 and is installed automatically by the installer if missing.
 
