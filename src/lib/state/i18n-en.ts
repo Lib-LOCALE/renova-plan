@@ -1,4 +1,5 @@
 export const EN: Record<string, string> = {
+  'Abandonner les modifications non enregistrées du projet actuel ?': 'Discard unsaved changes to the current project?',
   '2 pans': 'Gable', 'À affecter': 'Unassigned', 'À chiffrer': 'To price', 'À créer': 'New', 'À démolir': 'Demolish', 'À vérifier': 'To check', Accrochage: 'Snapping',
   'Afficher le mobilier': 'Show furniture', 'Afficher les cotes': 'Show dimensions', 'Afficher les noms': 'Show names', Aide: 'Help', Aides: 'Grants', Ajouter: 'Add', 'Ajouter un niveau': 'Add a level',
   'Ajoutez vos devis ici : ils remplaceront l’estimation calculée depuis le plan.': 'Add your quotes here. They replace the estimate computed from the plan.',

@@ -70,7 +70,6 @@ class AppState {
   future = $state.raw<Project[]>([]);
   shot: (() => string | null) | null = null;
   private toastTimer: ReturnType<typeof setTimeout> | undefined;
-  private saveTimer: ReturnType<typeof setTimeout> | undefined;
 
   constructor() {
     const prefs = store(PREFS);
@@ -113,7 +112,6 @@ class AppState {
     this.filePath = path;
     this.dirty = false;
     this.fitTick++;
-    clearTimeout(this.saveTimer);
     store(AUTOSAVE, JSON.stringify(p));
   }
 
@@ -125,8 +123,7 @@ class AppState {
 
   private markChanged() {
     this.dirty = true;
-    clearTimeout(this.saveTimer);
-    this.saveTimer = setTimeout(() => store(AUTOSAVE, JSON.stringify(this.project)), 600);
+    store(AUTOSAVE, JSON.stringify(this.project));
   }
 
   /** Modification unitaire : copie, applique, empile dans l'historique. */
@@ -222,7 +219,12 @@ class AppState {
     this.toastTimer = setTimeout(() => (this.toast = null), kind === 'err' ? 6000 : 2600);
   }
 
-  newFrom(kind: 'blank' | 'flat') {
+  private async canReplaceProject() {
+    return !this.dirty || window.confirm(t('Abandonner les modifications non enregistrées du projet actuel ?'));
+  }
+
+  async newFrom(kind: 'blank' | 'flat') {
+    if (!(await this.canReplaceProject())) return;
     this.adopt(localized(kind === 'blank' ? blankProject() : sampleFlat()));
     this.dialog = null;
     this.tool = 'select';
@@ -232,7 +234,9 @@ class AppState {
     try {
       const f = await openProjectFile();
       if (!f) return;
-      this.adopt(parseProject(f.text), f.path);
+      const project = parseProject(f.text);
+      if (!(await this.canReplaceProject())) return;
+      this.adopt(project, f.path);
       this.notify(`${f.name} ${t('ouvert')}`);
     } catch (e) {
       this.notify(e instanceof Error ? e.message : t("Impossible d'ouvrir ce fichier."), 'err');
