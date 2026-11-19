@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="linear-gradient-1" x1="12" y1="12" x2="244" y2="244" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0284c7"/>
+      <stop offset="0.55" stop-color="#0369a1"/>
+      <stop offset="1" stop-color="#082f49"/>
+    </linearGradient>
+    <clipPath id="clip-path-1">
+      <path d="M64 12 L192 12 C220.719 12 244 35.281 244 64 L244 192 C244 220.719 220.719 244 192 244 L64 244 C35.281 244 12 220.719 12 192 L12 64 C12 35.281 35.281 12 64 12 Z"/>
+    </clipPath>
+    <linearGradient id="linear-gradient-2" x1="42" y1="90" x2="214" y2="90" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fbbf24"/>
+      <stop offset="1" stop-color="#d97706"/>
+    </linearGradient>
+  </defs>
+  <title>RenovaPlan-Icon</title>
+  <g id="Fond_Badge">
+    <g>
+      <path d="M64 12 L192 12 C220.719 12 244 35.281 244 64 L244 192 C244 220.719 220.719 244 192 244 L64 244 C35.281 244 12 220.719 12 192 L12 64 C12 35.281 35.281 12 64 12 Z" fill="url(#linear-gradient-1)"/>
+      <path d="M64 12 L192 12 C220.719 12 244 35.281 244 64 L244 192 C244 220.719 220.719 244 192 244 L64 244 C35.281 244 12 220.719 12 192 L12 64 C12 35.281 35.281 12 64 12 Z" fill="none" stroke="#38bdf8" stroke-width="6" stroke-miterlimit="10" clip-path="url(#clip-path-1)"/>
+    </g>
+  </g>
+  <g id="Grille_Plan_2D">
+    <path d="M58 40 L198 40 C211.255 40 222 50.745 222 64 L222 192 C222 205.255 211.255 216 198 216 L58 216 C44.745 216 34 205.255 34 192 L34 64 C34 50.745 44.745 40 58 40 Z" fill="#0c4a6e" stroke="#0ea5e9" stroke-width="1.5" stroke-miterlimit="10" opacity="0.45"/>
+    <line x1="34" y1="84" x2="222" y2="84" fill="none" stroke="#38bdf8" stroke-miterlimit="10" opacity="0.25"/>
+    <line x1="34" y1="128" x2="222" y2="128" fill="none" stroke="#38bdf8" stroke-miterlimit="10" opacity="0.25"/>
+    <line x1="34" y1="172" x2="222" y2="172" fill="none" stroke="#38bdf8" stroke-miterlimit="10" opacity="0.25"/>
+    <line x1="81" y1="40" x2="81" y2="216" fill="none" stroke="#38bdf8" stroke-miterlimit="10" opacity="0.25"/>
+    <line x1="128" y1="40" x2="128" y2="216" fill="none" stroke="#38bdf8" stroke-miterlimit="10" opacity="0.25"/>
+    <line x1="175" y1="40" x2="175" y2="216" fill="none" stroke="#38bdf8" stroke-miterlimit="10" opacity="0.25"/>
+  </g>
+  <g id="Maison_Et_Plan">
+    <polygon points="48,118 128,50 208,118 192,118 192,202 64,202 64,118" fill="#faf8f5" stroke="#082f49" stroke-width="6" stroke-linejoin="round"/>
+    <polygon points="42,122 128,46 214,122 198,134 128,72 58,134" fill="url(#linear-gradient-2)" stroke="#ffffff" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M82 124 L122 124 C125.314 124 128 126.686 128 130 L128 184 C128 187.314 125.314 190 122 190 L82 190 C78.686 190 76 187.314 76 184 L76 130 C76 126.686 78.686 124 82 124 Z" fill="#e0f2fe" stroke="#0284c7" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M140 124 L174 124 C177.314 124 180 126.686 180 130 L180 184 C180 187.314 177.314 190 174 190 L140 190 C136.686 190 134 187.314 134 184 L134 130 C134 126.686 136.686 124 140 124 Z" fill="#d1fae5" stroke="#059669" stroke-width="5" stroke-linejoin="round"/>
+    <line x1="131" y1="120" x2="131" y2="194" fill="none" stroke="#dc2626" stroke-width="6" stroke-linecap="round" stroke-miterlimit="10" stroke-dasharray="10 8"/>
+  </g>
+  <g id="Poignees_Interactives">
+    <circle cx="180" cy="124" r="12" fill="#f97316" stroke="#ffffff" stroke-width="4" stroke-miterlimit="10"/>
+    <circle cx="180" cy="190" r="12" fill="#10b981" stroke="#ffffff" stroke-width="4" stroke-miterlimit="10"/>
+  </g>
+</svg>
